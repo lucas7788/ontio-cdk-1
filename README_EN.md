@@ -1,5 +1,7 @@
 [![Build Status](https://travis-ci.com/laizy/ontio-cdk.svg?branch=master)](https://travis-ci.com/laizy/ontio-cdk)
 
+English | [中文](README.md)
+
 `ontio-cdk` is a suite of WebAssembly smart contract tools for developing ontology using rust, including a standard library for contract writing, a runtime api for chain interaction, and a plugin for the contract interface abi.
 Contract testing framework, etc.
 
