@@ -4,7 +4,13 @@ use ontio_std::mock::build_runtime;
 #[test]
 fn initialize() {
     let hw = HelloWorldInstance;
-    assert_eq!(hw.hello(), "hello world");
+//    assert_eq!(hw.hello(), "hello world");
+
+    assert_eq!(hw.hello2("world"), "hello world");
+
+    assert_eq!(hw.save("key", "value"), true);
+
+    assert_eq!(hw.get("key"), "value");
 }
 
 
