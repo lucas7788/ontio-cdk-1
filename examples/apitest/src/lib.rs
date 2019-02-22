@@ -2,7 +2,8 @@
 extern crate ontio_std as ostd;
 use ostd::prelude::*;
 use ostd::abi::Dispatcher;
-use ostd::runtime;
+use ostd::{runtime};
+use ostd::abi::{Sink, Source, Decoder};
 
 #[ostd::abi_codegen::contract]
 pub trait ApiTest {
@@ -13,6 +14,9 @@ pub trait ApiTest {
     fn checkwitness(&self, addr: &Address) -> bool;
     fn get_current_block_hash(&self) -> String;
     fn get_current_tx_hash(&self) -> String;
+    fn call_name(&self, contract_address:&Address) -> String;
+    fn call_balance_of(&self, contract_address:&Address, addr:&Address) -> U256;
+    fn call_transfer(&self, contract_address:&Address, from: &Address, to:&Address, amount:U256) -> bool;
 }
 
 pub(crate) struct ApiTestInstance;
@@ -42,6 +46,35 @@ impl ApiTest for ApiTestInstance {
     fn get_current_tx_hash(&self) -> String {
         let txhash = runtime::get_current_tx_hash();
         format!("{:?}", txhash)
+    }
+    fn call_name(&self, contract_address:&Address) -> String {
+        let mut sink = Sink::new(16);
+        sink.write("name".to_string());
+        let res = runtime::call_contract(contract_address, sink.into().as_slice()).unwrap();
+        let mut source = Source::new(res);
+        source.read().unwrap()
+    }
+    fn call_balance_of(&self, contract_address:&Address, addr:&Address) -> U256 {
+        let mut sink = Sink::new(16);
+        sink.write(("balance_of".to_string(), addr));
+        let res = runtime::call_contract(contract_address, sink.into().as_slice());
+        if res.is_some() {
+            let temp = res.unwrap();
+            let mut source =Source::new(temp);
+            U256::decode(&mut source).unwrap()
+        } else {
+            U256::zero()
+        }
+    }
+    fn call_transfer(&self, contract_address:&Address, from: &Address, to:&Address, amount:U256) -> bool {
+        let mut sink = Sink::new(16);
+        sink.write(("transfer".to_string(),from, to, amount));
+        let res = runtime::call_contract(contract_address,sink.into().as_slice());
+        if res.is_some() {
+            true
+        } else {
+            false
+        }
     }
 }
 
