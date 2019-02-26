@@ -25,13 +25,39 @@ struct Function {
 #[derive(Serialize, Deserialize)]
 struct Parameters {
     name:String,
+    #[serde(rename = "type")]
     p_type:String,
 }
 
 unsafe  fn parse_json_to_go(file_path: String) {
     let struct_name = generate_go_struct_name(file_path.clone());
     let abi = read_file(&file_path);
-    generate_go_file(struct_name, abi);
+    generate_go_file2(struct_name, abi);
+}
+
+unsafe fn generate_go_file2(go_struct_name:String, abi: Abi) {
+    let mut buf = include_str!("demo.go");
+    let mut buf_new = buf.replace("DemoContract", &go_struct_name);
+    let file_new = File::create(format!("{}{}",go_struct_name, ".go".to_string())).unwrap();
+    let mut f_out = BufWriter::new(file_new);
+    f_out.write(buf_new.as_bytes());
+    let mut function_str = "func (this *DemoContract) FunctionName(parameters) (*types.MutableTransaction, error) {
+	bs, err := this.buildParams(function_name, []interface{}{parameter_name})
+	if err != nil {
+		return nil, fmt.Errorf(\"buildparams failed:s%\", err)
+	}
+	tx := this.vm.ontSdk.NewInvokeWasmTransaction(this.gasPrice, this.gasLimit, bs)
+	return tx, nil
+}";
+    for func in abi.functions {
+        let mut function_str_new = function_str.replace("FunctionName", &func.name);
+        let params = build_params(func.parameters);
+        function_str_new = function_str_new.replace("parameters", &params.0)
+            .replace("parameter_name", &params.1);
+        f_out.write(function_str_new.as_bytes());
+        f_out.write("\n".as_bytes());
+    }
+    f_out.flush();
 }
 
 unsafe fn generate_go_file(go_struct_name:String, abi: Abi) {
