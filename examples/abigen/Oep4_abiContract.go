@@ -60,64 +60,64 @@ func (this *Oep4_abiContract) buildParams(method string, params []interface{}) (
 	contract.Serialize(bf)
 	return bf.Bytes(), nil
 }
-func (this *DemoContract) name() (*types.MutableTransaction, error) {
-	bs, err := this.buildParams(function_name, []interface{}{})
+func (this *DemoContract) Name() (*types.MutableTransaction, error) {
+	bs, err := this.buildParams("name", []interface{}{})
 	if err != nil {
 		return nil, fmt.Errorf("buildparams failed:s%", err)
 	}
 	tx := this.vm.ontSdk.NewInvokeWasmTransaction(this.gasPrice, this.gasLimit, bs)
 	return tx, nil
 }
-func (this *DemoContract) symbol() (*types.MutableTransaction, error) {
-	bs, err := this.buildParams(function_name, []interface{}{})
+func (this *DemoContract) Symbol() (*types.MutableTransaction, error) {
+	bs, err := this.buildParams("symbol", []interface{}{})
 	if err != nil {
 		return nil, fmt.Errorf("buildparams failed:s%", err)
 	}
 	tx := this.vm.ontSdk.NewInvokeWasmTransaction(this.gasPrice, this.gasLimit, bs)
 	return tx, nil
 }
-func (this *DemoContract) balanceOf(owner common.Address) (*types.MutableTransaction, error) {
-	bs, err := this.buildParams(function_name, []interface{}{owner})
+func (this *DemoContract) BalanceOf(owner common.Address) (*types.MutableTransaction, error) {
+	bs, err := this.buildParams("balanceOf", []interface{}{owner})
 	if err != nil {
 		return nil, fmt.Errorf("buildparams failed:s%", err)
 	}
 	tx := this.vm.ontSdk.NewInvokeWasmTransaction(this.gasPrice, this.gasLimit, bs)
 	return tx, nil
 }
-func (this *DemoContract) transfer(fromAcct common.Address, toAcct common.Address, amount U256) (*types.MutableTransaction, error) {
-	bs, err := this.buildParams(function_name, []interface{}{fromAcct, toAcct, amount})
+func (this *DemoContract) Transfer(fromAcct common.Address, toAcct common.Address, amount U256) (*types.MutableTransaction, error) {
+	bs, err := this.buildParams("transfer", []interface{}{fromAcct, toAcct, amount})
 	if err != nil {
 		return nil, fmt.Errorf("buildparams failed:s%", err)
 	}
 	tx := this.vm.ontSdk.NewInvokeWasmTransaction(this.gasPrice, this.gasLimit, bs)
 	return tx, nil
 }
-func (this *DemoContract) transferMulti() (*types.MutableTransaction, error) {
-	bs, err := this.buildParams(function_name, []interface{}{args})
+func (this *DemoContract) TransferMulti() (*types.MutableTransaction, error) {
+	bs, err := this.buildParams("transferMulti", []interface{}{args})
 	if err != nil {
 		return nil, fmt.Errorf("buildparams failed:s%", err)
 	}
 	tx := this.vm.ontSdk.NewInvokeWasmTransaction(this.gasPrice, this.gasLimit, bs)
 	return tx, nil
 }
-func (this *DemoContract) approve(toAcct common.Address) (*types.MutableTransaction, error) {
-	bs, err := this.buildParams(function_name, []interface{}{toAcct})
+func (this *DemoContract) Approve(toAcct common.Address) (*types.MutableTransaction, error) {
+	bs, err := this.buildParams("approve", []interface{}{toAcct})
 	if err != nil {
 		return nil, fmt.Errorf("buildparams failed:s%", err)
 	}
 	tx := this.vm.ontSdk.NewInvokeWasmTransaction(this.gasPrice, this.gasLimit, bs)
 	return tx, nil
 }
-func (this *DemoContract) init() (*types.MutableTransaction, error) {
-	bs, err := this.buildParams(function_name, []interface{}{})
+func (this *DemoContract) Init() (*types.MutableTransaction, error) {
+	bs, err := this.buildParams("init", []interface{}{})
 	if err != nil {
 		return nil, fmt.Errorf("buildparams failed:s%", err)
 	}
 	tx := this.vm.ontSdk.NewInvokeWasmTransaction(this.gasPrice, this.gasLimit, bs)
 	return tx, nil
 }
-func (this *DemoContract) totalSupply() (*types.MutableTransaction, error) {
-	bs, err := this.buildParams(function_name, []interface{}{})
+func (this *DemoContract) TotalSupply() (*types.MutableTransaction, error) {
+	bs, err := this.buildParams("totalSupply", []interface{}{})
 	if err != nil {
 		return nil, fmt.Errorf("buildparams failed:s%", err)
 	}

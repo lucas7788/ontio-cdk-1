@@ -42,7 +42,7 @@ unsafe fn generate_go_file2(go_struct_name:String, abi: Abi) {
     let mut f_out = BufWriter::new(file_new);
     f_out.write(buf_new.as_bytes());
     let mut function_str = "func (this *DemoContract) FunctionName(parameters) (*types.MutableTransaction, error) {
-	bs, err := this.buildParams(function_name, []interface{}{parameter_name})
+	bs, err := this.buildParams(\"function_name\", []interface{}{parameter_name})
 	if err != nil {
 		return nil, fmt.Errorf(\"buildparams failed:s%\", err)
 	}
@@ -50,10 +50,13 @@ unsafe fn generate_go_file2(go_struct_name:String, abi: Abi) {
 	return tx, nil
 }";
     for func in abi.functions {
-        let mut function_str_new = function_str.replace("FunctionName", &func.name);
+        let mut function_str_new = function_str
+            .replace("FunctionName", &first_char_to_upper(func.name.clone()));
         let params = build_params(func.parameters);
-        function_str_new = function_str_new.replace("parameters", &params.0)
-            .replace("parameter_name", &params.1);
+        function_str_new = function_str_new
+            .replace("parameters", &params.0)
+            .replace("parameter_name", &params.1)
+            .replace("function_name", &func.name);
         f_out.write(function_str_new.as_bytes());
         f_out.write("\n".as_bytes());
     }
