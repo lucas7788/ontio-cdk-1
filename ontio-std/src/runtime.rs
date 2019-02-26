@@ -1,12 +1,12 @@
-use super::types::{Address, H256};
+use super::types::{Address, H160};
 use super::{vec, Vec};
 
 mod env {
     extern "C" {
         pub fn timestamp() -> u64;
-        pub fn blockheight() -> u64;
-        pub fn selfaddress(dest: *mut u8);
-        pub fn calleraddress(dest: *mut u8);
+        pub fn block_height() -> u32;
+        pub fn self_address(dest: *mut u8);
+        pub fn caller_address(dest: *mut u8);
         pub fn checkwitness(addr: *const u8) -> u32;
         pub fn ret(ptr: *const u8, len: u32) -> !;
         pub fn notify(ptr: *const u8, len: u32);
@@ -14,9 +14,9 @@ mod env {
         pub fn get_input(dst: *mut u8);
         pub fn call_contract(addr: *const u8, input_ptr: *const u8, input_len: u32) -> i32;
         pub fn call_output_length() -> u32;
-        pub fn get_call_output(dst: *mut u8);
-        pub fn get_current_block_hash(dest: *mut u8);
-        pub fn get_current_tx_hash(dest: *mut u8);
+        pub fn get_callout(dst: *mut u8);
+        pub fn current_blockhash(blockhash: *const u8) -> u32;
+        pub fn current_txhash(txhash: *const u8) -> u32;
 
         pub fn storage_read(key: *const u8, klen: u32, val: *mut u8, vlen: u32, offset: u32) -> u32;
         pub fn storage_write(key: *const u8, klen: u32, val: *const u8, vlen: u32);
@@ -41,7 +41,7 @@ pub fn call_contract(addr: &Address, input: &[u8]) -> Option<Vec<u8>> {
     if size != 0 {
         let value = &mut output[..];
         unsafe {
-            env::get_call_output(value.as_mut_ptr());
+            env::get_callout(value.as_mut_ptr());
         }
     }
 
@@ -89,15 +89,15 @@ pub fn timestamp() -> u64 {
 }
 
 /// Get current block height
-pub fn block_height() -> u64 {
-    unsafe { env::blockheight() }
+pub fn block_height() -> u32 {
+    unsafe { env::block_height() }
 }
 
 /// Get the address of current executing contract
 pub fn address() -> Address {
     let mut addr: Address = Address::zero();
     unsafe {
-        env::selfaddress(addr.as_mut().as_mut_ptr());
+        env::self_address(addr.as_mut().as_mut_ptr());
     }
 
     addr
@@ -106,25 +106,21 @@ pub fn address() -> Address {
 pub fn caller() -> Address {
     let mut addr: Address = Address::zero();
     unsafe {
-        env::calleraddress(addr.as_mut().as_mut_ptr());
+        env::caller_address(addr.as_mut().as_mut_ptr());
     }
     addr
 }
 ///return current block hash
-pub fn get_current_block_hash() -> H256 {
-    let mut blockhash = H256::zero();
+pub fn current_blockhash(blockhash: &H160) -> u32 {
     unsafe {
-        env::get_current_block_hash(blockhash.as_mut().as_mut_ptr());
+        env::current_blockhash(blockhash.as_ptr())
     }
-    blockhash
 }
 ///return current tx hash
-pub fn get_current_tx_hash() -> H256 {
-    let mut txhash = H256::zero();
+pub fn current_txhash(txhash: &H160) -> u32 {
     unsafe {
-        env::get_current_tx_hash(txhash.as_mut().as_mut_ptr());
+        env::current_txhash(txhash.as_ptr())
     }
-    txhash
 }
 ///Check signature
 pub fn check_witness(addr: &Address) -> bool {

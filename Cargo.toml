@@ -9,6 +9,7 @@ members = [
     "examples/helloworld",
     "examples/apitest",
     "examples/helloworld2",
+    "examples/abigen",
 ]
 
 [profile.release]

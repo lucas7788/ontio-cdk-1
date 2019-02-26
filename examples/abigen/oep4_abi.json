@@ -1,0 +1,16 @@
+{
+  "CompilerVersion":"1.0.2",
+  "hash":"668a6f4c7a9bf793f359edeb2be9389dd8648626",
+  "entrypoint":"Main",
+  "functions":[
+    {"name":"name","parameters":[]},
+    {"name":"symbol","parameters":[]},
+    {"name":"balanceOf","parameters":[{"name":"owner","p_type":"Address"}]},
+    {"name":"transfer","parameters":[{"name":"fromAcct","p_type":"Address"},{"name":"toAcct","p_type":"Address"},
+      {"name":"amount","p_type":"U256"}]},
+    {"name":"transferMulti","parameters":[{"name":"args","p_type":""}]},
+    {"name":"approve","parameters":[{"name":"toAcct","p_type":"Address"}]},
+    {"name":"init","parameters":[]},
+    {"name":"totalSupply","parameters":[]}
+  ]
+}
