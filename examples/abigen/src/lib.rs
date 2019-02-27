@@ -204,12 +204,6 @@ unsafe fn first_char_to_upper(temp:String) ->String {
     res.to_string()
 }
 fn read_file(file_path: &str) -> Abi {
-    let path = Path::new(file_path);
-    let display = path.display();
-    let mut file = match  File::open(path){
-        Err(why) => panic!("couldn't open {}: {}", ),
-        Ok(file) => file,
-    };
     let mut f = File::open(file_path).unwrap();
     let mut buf = String::new();
     f.read_to_string(&mut buf).expect("something went wrong reading the file");

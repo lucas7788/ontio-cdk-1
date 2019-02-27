@@ -1,6 +1,5 @@
 #![recursion_limit = "256"]
 #![feature(proc_macro_hygiene)]
-
 extern crate proc_macro;
 use proc_macro::TokenStream;
 use quote::quote;
@@ -8,6 +7,7 @@ use syn::{parse_macro_input, Lit};
 
 mod base58;
 mod contract;
+mod json2go;
 
 #[proc_macro_attribute]
 pub fn contract(_metadata: TokenStream, input: TokenStream) -> TokenStream {
