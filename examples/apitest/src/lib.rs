@@ -5,6 +5,7 @@ use ostd::abi::Dispatcher;
 use ostd::{runtime, console};
 use ostd::abi::{Sink, Source, Decoder};
 use ostd::types::H160;
+use ostd::str;
 
 #[ostd::abi_codegen::contract]
 pub trait ApiTest {
@@ -21,6 +22,7 @@ pub trait ApiTest {
     fn call_name(&self, contract_address:&Address) -> String;
     fn call_balance_of(&self, contract_address:&Address, addr:&Address) -> U256;
     fn call_transfer(&self, contract_address:&Address, from: &Address, to:&Address, amount:U256) -> bool;
+    fn call_native_transfer(&self, contract_address:&Address, vesion:u8, from: &Address, to:&Address, amount:U256) -> bool;
 }
 
 pub(crate) struct ApiTestInstance;
@@ -74,6 +76,8 @@ impl ApiTest for ApiTestInstance {
         sink.write("name".to_string());
         console::debug(&format!("{:?}", contract_address));
         let res = runtime::call_contract(contract_address, sink.into().as_slice()).unwrap();
+        let s = str::from_utf8(res.as_slice()).unwrap();
+        console::debug(s);
         let mut source = Source::new(res);
         source.read().unwrap()
     }
@@ -92,6 +96,16 @@ impl ApiTest for ApiTestInstance {
     fn call_transfer(&self, contract_address:&Address, from: &Address, to:&Address, amount:U256) -> bool {
         let mut sink = Sink::new(16);
         sink.write(("transfer".to_string(),from, to, amount));
+        let res = runtime::call_contract(contract_address,sink.into().as_slice());
+        if res.is_some() {
+            true
+        } else {
+            false
+        }
+    }
+    fn call_native_transfer(&self, contract_address:&Address, version:u8, from: &Address, to:&Address, amount:U256) -> bool {
+        let mut sink = Sink::new(16);
+        sink.write(("transfer".to_string(),version,from, to, amount));
         let res = runtime::call_contract(contract_address,sink.into().as_slice());
         if res.is_some() {
             true
