@@ -7,6 +7,7 @@ mod env {
         pub fn block_height() -> u32;
         pub fn self_address(dest: *mut u8);
         pub fn caller_address(dest: *mut u8);
+        pub fn entry_address(dest: *mut u8);
         pub fn checkwitness(addr: *const u8) -> u32;
         pub fn ret(ptr: *const u8, len: u32) -> !;
         pub fn notify(ptr: *const u8, len: u32);
@@ -48,6 +49,7 @@ pub fn call_contract(addr: &Address, input: &[u8]) -> Option<Vec<u8>> {
 
     Some(output)
 }
+
 
 pub fn storage_write(key: &[u8], val: &[u8]) {
     unsafe {
@@ -108,6 +110,14 @@ pub fn caller() -> Address {
     let mut addr: Address = Address::zero();
     unsafe {
         env::caller_address(addr.as_mut().as_mut_ptr());
+    }
+    addr
+}
+/// return the entry address
+pub fn entry_address() -> Address {
+    let mut addr: Address = Address::zero();
+    unsafe {
+        env::entry_address(addr.as_mut().as_mut_ptr());
     }
     addr
 }

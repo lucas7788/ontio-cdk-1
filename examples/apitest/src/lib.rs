@@ -2,18 +2,21 @@
 extern crate ontio_std as ostd;
 use ostd::prelude::*;
 use ostd::abi::Dispatcher;
-use ostd::{runtime};
+use ostd::{runtime, console};
 use ostd::abi::{Sink, Source, Decoder};
+use ostd::types::H160;
 
 #[ostd::abi_codegen::contract]
 pub trait ApiTest {
     fn timestamp(&self) -> u64;
     fn blockheight(&self) -> u32;
-    fn selfaddress(&self) -> String;
-    fn calleraddress(&self) -> String;
+    fn selfaddress(&self) -> Address;
+    fn calleraddress(&self) -> Address;
+    fn entry_address(&self) -> Address;
+    fn contract_debug(&self, content:&str);
     fn checkwitness(&self, addr: &Address) -> bool;
-//    fn get_current_blockhash(&self) -> u32;
-//    fn get_current_txhash(&self) -> u32;
+    fn get_current_blockhash(&self) -> H160;
+    fn get_current_txhash(&self) -> H160;
     fn call_name(&self, contract_address:&Address) -> String;
     fn call_balance_of(&self, contract_address:&Address, addr:&Address) -> U256;
     fn call_transfer(&self, contract_address:&Address, from: &Address, to:&Address, amount:U256) -> bool;
@@ -28,23 +31,40 @@ impl ApiTest for ApiTestInstance {
     fn blockheight(&self) -> u32 {
         runtime::block_height()
     }
-    fn selfaddress(&self) -> String {
-        let addr = runtime::address();
-        format!("{:?}", addr)
+    fn selfaddress(&self) -> Address {
+        runtime::address()
     }
-    fn calleraddress(&self) -> String {
-        let addr = runtime::caller();
-        format!("{:?}", addr)
+    fn calleraddress(&self) -> Address {
+        runtime::caller()
+    }
+    fn entry_address(&self) -> Address {
+        runtime::entry_address()
+    }
+    fn contract_debug(&self, content:&str) {
+        console::debug(content);
     }
     fn checkwitness(&self, addr: &Address) -> bool {
-        runtime::check_witness(addr)
+        let b = runtime::check_witness(addr);
+        if b {
+            runtime::notify("success".as_bytes());
+            true
+        } else {
+            runtime::notify("failed".as_bytes());
+            false
+        }
     }
-//    fn get_current_blockhash(&self) -> u32 {
-//        runtime::current_blockhash()
-//    }
-//    fn get_current_txhash(&self) -> u32 {
-//        runtime::current_txhash()
-//    }
+    fn get_current_blockhash(&self) -> H160 {
+        let mut temp:[u8;20] = [0;20];
+        let mut blockhash = H160::new(temp);
+        runtime::current_blockhash(&blockhash);
+        blockhash
+    }
+    fn get_current_txhash(&self) -> H160 {
+        let mut temp:[u8;20] = [0;20];
+        let mut txhash = H160::new(temp);
+        runtime::current_txhash(&txhash);
+        txhash
+    }
     fn call_name(&self, contract_address:&Address) -> String {
         let mut sink = Sink::new(16);
         sink.write("name".to_string());
