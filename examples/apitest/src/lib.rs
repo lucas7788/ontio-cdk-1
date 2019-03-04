@@ -13,7 +13,8 @@ pub trait ApiTest {
     fn selfaddress(&self) -> Address;
     fn calleraddress(&self) -> Address;
     fn entry_address(&self) -> Address;
-    fn contract_debug(&self, content:&str);
+    fn contract_debug(&self, content:&str) ->();
+//    fn contract_delete(&self) -> ();
     fn checkwitness(&self, addr: &Address) -> bool;
     fn get_current_blockhash(&self) -> H160;
     fn get_current_txhash(&self) -> H160;
@@ -43,6 +44,9 @@ impl ApiTest for ApiTestInstance {
     fn contract_debug(&self, content:&str) {
         console::debug(content);
     }
+//    fn contract_delete(&self) -> () {
+//        runtime::contract_delete();
+//    }
     fn checkwitness(&self, addr: &Address) -> bool {
         let b = runtime::check_witness(addr);
         if b {
@@ -68,6 +72,7 @@ impl ApiTest for ApiTestInstance {
     fn call_name(&self, contract_address:&Address) -> String {
         let mut sink = Sink::new(16);
         sink.write("name".to_string());
+        console::debug(&format!("{:?}", contract_address));
         let res = runtime::call_contract(contract_address, sink.into().as_slice()).unwrap();
         let mut source = Source::new(res);
         source.read().unwrap()

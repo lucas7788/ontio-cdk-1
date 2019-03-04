@@ -20,6 +20,7 @@ mod env {
         pub fn current_txhash(txhash: *const u8) -> u32;
         pub fn contract_migrate(code:*const u8, codelen:*const u8, needStorage:*const u8,
         );
+//        pub fn contract_delete();
         pub fn storage_read(key: *const u8, klen: u32, val: *mut u8, vlen: u32, offset: u32) -> u32;
         pub fn storage_write(key: *const u8, klen: u32, val: *const u8, vlen: u32);
         pub fn storage_delete(key: *const u8, klen: u32);
@@ -49,7 +50,11 @@ pub fn call_contract(addr: &Address, input: &[u8]) -> Option<Vec<u8>> {
 
     Some(output)
 }
-
+//pub fn contract_delete() {
+//    unsafe {
+//        env::contract_delete();
+//    }
+//}
 
 pub fn storage_write(key: &[u8], val: &[u8]) {
     unsafe {
