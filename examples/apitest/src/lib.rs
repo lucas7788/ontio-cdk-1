@@ -106,11 +106,12 @@ impl ApiTest for ApiTestInstance {
     fn call_native_transfer(&self, contract_address:&Address, version:u8, from: &Address, to:&Address, amount:U256) -> bool {
         let mut sink = Sink::new(16);
         sink.write((version, "transfer".to_string()));
-        sink.write_u32(1+1+20+20+32);
+        //1+1+20+20+32
+        sink.write(74u32);
         //transfer length
-        sink.write_u32(1u32);
+        sink.write(1u32);
         //state length
-        sink.write_u32(1u32);
+        sink.write(1u32);
         sink.write((from, to, amount));
         let res = runtime::call_contract(contract_address,sink.into().as_slice());
         if res.is_some() {
