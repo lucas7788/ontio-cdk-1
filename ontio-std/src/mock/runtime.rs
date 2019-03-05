@@ -77,12 +77,12 @@ mod env {
     }
 
     #[no_mangle]
-    pub unsafe extern "C" fn blockheight() -> u64 {
+    pub unsafe extern "C" fn block_height() -> u64 {
         RUNTIME.with(|r| r.borrow().block_height())
     }
 
     #[no_mangle]
-    pub unsafe extern "C" fn selfaddress(dest: *mut u8) {
+    pub unsafe extern "C" fn self_address(dest: *mut u8) {
         RUNTIME.with(|r| {
             let addr = r.borrow().address();
              ptr::copy(addr.as_ptr(), dest, Address::len_bytes());
@@ -90,7 +90,7 @@ mod env {
     }
 
     #[no_mangle]
-    pub unsafe extern "C" fn calleraddress(dest: *mut u8) {
+    pub unsafe extern "C" fn caller_address(dest: *mut u8) {
         RUNTIME.with(|r| {
             let caller = r.borrow().caller();
             ptr::copy(caller.as_ptr(), dest, Address::len_bytes());
@@ -98,7 +98,7 @@ mod env {
     }
 
     #[no_mangle]
-    pub unsafe extern "C" fn checkwitness(addr: *const u8) -> bool {
+    pub unsafe extern "C" fn check_witness(addr: *const u8) -> bool {
         let address = Address::from_slice(slice::from_raw_parts(addr, 20));
         RUNTIME.with(|r| r.borrow().check_witness(&address))
     }

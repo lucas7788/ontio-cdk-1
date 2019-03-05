@@ -1,4 +1,6 @@
 #![cfg_attr(not(feature="mock"), no_std)]
+#![feature(proc_macro_hygiene)]
+
 extern crate ontio_std as ostd;
 use ostd::prelude::*;
 use ostd::abi::Dispatcher;

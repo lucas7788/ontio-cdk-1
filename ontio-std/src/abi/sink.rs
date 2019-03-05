@@ -50,7 +50,7 @@ impl Sink {
         self.write_bytes(&buf)
     }
 
-    pub(crate) fn write_varuint(&mut self, val: u64) {
+    pub fn write_varuint(&mut self, val: u64) {
         if val < 0xFD {
             self.write_byte(val as u8);
         } else if val < 0xFFFF {

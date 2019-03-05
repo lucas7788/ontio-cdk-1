@@ -8,14 +8,14 @@ mod env {
         pub fn self_address(dest: *mut u8);
         pub fn caller_address(dest: *mut u8);
         pub fn entry_address(dest: *mut u8);
-        pub fn checkwitness(addr: *const u8) -> u32;
+        pub fn check_witness(addr: *const u8) -> u32;
         pub fn ret(ptr: *const u8, len: u32) -> !;
         pub fn notify(ptr: *const u8, len: u32);
         pub fn input_length() -> u32;
         pub fn get_input(dst: *mut u8);
         pub fn call_contract(addr: *const u8, input_ptr: *const u8, input_len: u32) -> i32;
         pub fn call_output_length() -> u32;
-        pub fn get_callout(dst: *mut u8);
+        pub fn get_output(dst: *mut u8);
         pub fn current_blockhash(blockhash: *const u8) -> u32;
         pub fn current_txhash(txhash: *const u8) -> u32;
         pub fn contract_migrate(code:*const u8, codelen:*const u8, needStorage:*const u8,
@@ -44,7 +44,7 @@ pub fn call_contract(addr: &Address, input: &[u8]) -> Option<Vec<u8>> {
     if size != 0 {
         let value = &mut output[..];
         unsafe {
-            env::get_callout(value.as_mut_ptr());
+            env::get_output(value.as_mut_ptr());
         }
     }
 
@@ -140,7 +140,7 @@ pub fn current_txhash(txhash: &H160) -> u32 {
 }
 ///Check signature
 pub fn check_witness(addr: &Address) -> bool {
-    unsafe { env::checkwitness(addr.as_ptr()) != 0 }
+    unsafe { env::check_witness(addr.as_ptr()) != 0 }
 }
 
 /// Get input data from transaction or caller contract
