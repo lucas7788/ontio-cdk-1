@@ -112,9 +112,13 @@ impl ApiTest for ApiTestInstance {
         sink.write(1u32);
         sink.write((from, to, amount));
         let res = runtime::call_contract(contract_address,sink.into().as_slice());
-        if res.is_some() {
-            true
+        if let data = res.unwrap_or_default() {
+            runtime::notify("true".as_bytes());
+            let s = str::from_utf8(data.as_slice()).unwrap();
+            console::debug(s);
+            return true;
         } else {
+            runtime::notify("false".as_bytes());
             false
         }
     }
