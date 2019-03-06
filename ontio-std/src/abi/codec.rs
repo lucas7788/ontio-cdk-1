@@ -162,6 +162,14 @@ impl<T: Decoder> Decoder for Vec<T> {
         Ok(value)
     }
 }
+impl <T:Encoder> Encoder for Vec<T> {
+    fn encode(self, sink:&mut Sink) {
+        sink.write_varuint(self.len() as u64);
+        for i in self {
+            sink.write(i);
+        }
+    }
+}
 
 impl<T> Encoder for &[T] where for<'a> &'a T: Encoder {
     fn encode(self, sink: &mut Sink) {

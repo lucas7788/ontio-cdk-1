@@ -18,9 +18,19 @@ pub(crate) struct RuntimeInner{
     pub(crate) self_addr:Address,
     pub(crate) witness: Vec<Address>,
     pub(crate) notify: Vec<Vec<u8>>,
+    pub(crate) call_output_length:u32,
 }
 
 impl Runtime {
+    fn call_contract(&self, addr: &Address, input: &[u8]) -> Option<Vec<u8>> {
+        None
+    }
+    fn call_output_length(&self) -> u32 {
+        self.inner.borrow().call_output_length
+    }
+    fn get_output(&self, dst: *mut u8) {
+
+    }
     fn storage_write(&self, key: &[u8], val: &[u8]) {
         self.inner.borrow_mut().storage.insert(key.into(), val.to_vec());
     }
@@ -134,5 +144,25 @@ mod env {
     pub unsafe fn notify(ptr: *const u8, len: u32) {
         let msg = slice::from_raw_parts(ptr, len as usize);
         RUNTIME.with(|r| r.borrow().notify(msg));
+    }
+    #[no_mangle]
+    pub unsafe extern "C" fn get_output(dest: *mut u8){
+        RUNTIME.with(|r| r.borrow().get_output(dest))
+    }
+    #[no_mangle]
+    pub unsafe extern "C" fn call_output_length() -> u32 {
+        RUNTIME.with(|r| r.borrow().call_output_length())
+    }
+    #[no_mangle]
+    pub unsafe extern "C" fn call_contract(addr: *const u8, input_ptr: *const u8, input_len: u32) -> u32 {
+        let address = Address::from_slice(slice::from_raw_parts(addr, 20));
+        let input = slice::from_raw_parts(input_ptr, input_len as usize);
+        let v= RUNTIME.with(|r| r.borrow().call_contract(&address, input));
+        match v {
+            None => u32::MAX,
+            Some(v) => {
+                v.len() as u32
+            }
+        }
     }
 }

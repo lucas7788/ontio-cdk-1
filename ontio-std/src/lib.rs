@@ -3,6 +3,7 @@
 #![feature(allocator_api)]
 #![feature(alloc)]
 #![cfg_attr(not(feature = "std"), no_std)]
+#![feature(proc_macro_hygiene)]
 
 //#![feature(trace_macros)]
 
@@ -48,12 +49,12 @@ pub mod prelude {
 }
 
 pub use core::cmp;
-
 pub mod abi;
 pub mod console;
 pub mod runtime;
 pub mod database;
 pub mod types;
+pub mod contract;
 pub mod abi_codegen {
     pub use ontio_codegen::contract;
 }
