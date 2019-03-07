@@ -18,7 +18,10 @@ mod env {
         pub fn get_output(dst: *mut u8);
         pub fn current_blockhash(blockhash: *const u8) -> u32;
         pub fn current_txhash(txhash: *const u8) -> u32;
-        pub fn contract_migrate(code:*const u8, codelen:*const u8, needStorage:*const u8);
+        pub fn contract_migrate(code:*const u8, code_len: u32, vm_type:u32, name_ptr:*const u8,
+                                name_len: u32, ver_ptr:*const u8, ver_len:u32, author_ptr:*const u8,
+                                author_len:u32, email_ptr:*const u8, email_len:u32, desc_ptr:*const u8,
+                                desc_len:u32, new_address_ptr:*mut u8) -> i32;
 //        pub fn contract_delete();
         pub fn storage_read(key: *const u8, klen: u32, val: *mut u8, vlen: u32, offset: u32) -> u32;
         pub fn storage_write(key: *const u8, klen: u32, val: *const u8, vlen: u32);
@@ -48,6 +51,21 @@ pub fn call_contract(addr: &Address, input: &[u8]) -> Option<Vec<u8>> {
     }
 
     Some(output)
+}
+pub fn contract_migrate(code: &[u8], vm_type: u32, name:&str, version:&str,author: &str, email:&str,
+          desc:&str) -> Option<Address> {
+    let mut addr: Address = Address::zero();
+    let res = unsafe {
+        env::contract_migrate(code.as_ptr(),code.len() as u32,vm_type,name.as_ptr(),
+                              name.len() as u32,version.as_ptr(), version.len() as u32,
+                              author.as_ptr(),author.len() as u32,email.as_ptr(),
+                              email.len() as u32, desc.as_ptr(),desc.len() as u32,
+                              addr.as_mut().as_mut_ptr())
+    };
+    if res < 0 {
+        return None;
+    }
+    Some(addr)
 }
 //pub fn contract_delete() {
 //    unsafe {

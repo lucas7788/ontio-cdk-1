@@ -11,6 +11,7 @@ path = "src/lib.rs"
 [dependencies]
 ontio-std = {path="../../ontio-std"}
 hex = "0.3.2"
+etcommon-hexutil = { version = "0.2.4", default-features = false }
 
 [features]
 mock = ["ontio-std/mock"]

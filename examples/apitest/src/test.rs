@@ -1,4 +1,4 @@
-extern crate hex;
+extern crate hexutil;
 extern crate ontio_std as ostd;
 use crate::{ApiTest,ApiTestInstance};
 use ostd::types::Address;
@@ -6,9 +6,9 @@ use ostd::abi::{Sink, Source};
 use ostd::types::{U256,to_neo_bytes};
 use ostd::vec::Vec;
 
-const _from: Address = ostd::base58!("Ad4pjz2bqep4RhQrUAzMuZJkBC3qJ1tZuT");
+const _from: Address = ostd::base58!("AeJGmTDUdSzMdrSHU2pa8rLMo23AAs53LM");
 
-const _to: Address = ostd::base58!("AS3SCXw8GKTEeXpdwVw7EcC4rqSebFYpfb");
+const _to: Address = ostd::base58!("AbPRaepcpBAFHz9zCj4619qch4Aq5hJARA");
 
 #[test]
 fn call_trasnfer2() {
@@ -30,7 +30,7 @@ fn call_neovm_transfer() {
     sink.write(193u8);
     sink.write("transfer".to_string());
     let d = sink.into();
-    println!("res:{}", hex::encode(d));
+    println!("res:{}", hexutil::to_hex(d.as_slice()));
     assert_eq!(false, true)
 }
 
@@ -44,7 +44,7 @@ fn call_native2() {
     sink.write(u256_to_neo_bytes(amount));
     let data = sink.into();
     println!("{:?}", data);
-    println!("{}", hex::encode(data.as_slice()));
+//    println!("{}", hex::encode(data.as_slice()));
     assert_eq!(false, true);
 }
 #[test]
@@ -105,11 +105,11 @@ fn timestamp(){
     let mut temp = [0u8;32];
     data.to_little_endian(&mut temp);
     temp.reverse();
-    println!("temp:{}", hex::encode(temp.to_vec()));
+//    println!("temp:{}", hex::encode(temp.to_vec()));
     let mut res:Vec<u8> = Vec::new();
     if data.is_zero() {
         res.push(0);
-        println!("res:{}", hex::encode(res));
+//        println!("res:{}", hex::encode(res));
         assert_eq!(false, true);
         return;
     }
@@ -125,7 +125,7 @@ fn timestamp(){
     if f {
         res.push(0);
     }
-    println!("res:{}", hex::encode(res));
+
     assert_eq!(false, true);
 }
 
