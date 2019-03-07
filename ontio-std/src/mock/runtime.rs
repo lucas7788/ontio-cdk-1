@@ -19,6 +19,7 @@ pub(crate) struct RuntimeInner{
     pub(crate) witness: Vec<Address>,
     pub(crate) notify: Vec<Vec<u8>>,
     pub(crate) call_output_length:u32,
+    pub(crate) debug: Vec<String>,
 }
 
 impl Runtime {
@@ -28,7 +29,7 @@ impl Runtime {
     fn call_output_length(&self) -> u32 {
         self.inner.borrow().call_output_length
     }
-    fn get_output(&self, dst: *mut u8) {
+    fn get_call_output(&self, dst: *mut u8) {
 
     }
     fn storage_write(&self, key: &[u8], val: &[u8]) {
@@ -65,6 +66,10 @@ impl Runtime {
 
     fn notify(&self, msg: &[u8]) {
         self.inner.borrow_mut().notify.push(msg.to_vec());
+    }
+
+    fn debug(&self, msg: &str) {
+        self.inner.borrow_mut().debug.push(msg.to_string())
     }
 }
 
@@ -145,9 +150,14 @@ mod env {
         let msg = slice::from_raw_parts(ptr, len as usize);
         RUNTIME.with(|r| r.borrow().notify(msg));
     }
+
     #[no_mangle]
-    pub unsafe extern "C" fn get_output(dest: *mut u8){
-        RUNTIME.with(|r| r.borrow().get_output(dest))
+    pub unsafe fn debug(msg: &str) {
+        RUNTIME.with(|r| r.borrow().debug(msg));
+    }
+    #[no_mangle]
+    pub unsafe extern "C" fn get_call_output(dest: *mut u8){
+        RUNTIME.with(|r| r.borrow().get_call_output(dest))
     }
     #[no_mangle]
     pub unsafe extern "C" fn call_output_length() -> u32 {

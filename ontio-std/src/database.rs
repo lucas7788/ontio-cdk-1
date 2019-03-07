@@ -1,9 +1,11 @@
 use super::abi::{Sink,Source, Encoder, Decoder};
 use super::runtime;
+use super::prelude::*;
+use crate::console;
 
 pub fn get<K: AsRef<[u8]>, T:Decoder>(key: K) -> Option<T> {
     runtime::storage_read(key.as_ref()).map(|val|{
-        let mut source = Source::new(val);
+        let mut source = Source::new(val.clone());
         source.read().unwrap()
     })
 }

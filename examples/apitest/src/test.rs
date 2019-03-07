@@ -10,10 +10,14 @@ const _from: Address = ostd::base58!("AeJGmTDUdSzMdrSHU2pa8rLMo23AAs53LM");
 
 const _to: Address = ostd::base58!("AbPRaepcpBAFHz9zCj4619qch4Aq5hJARA");
 
+
 #[test]
 fn call_trasnfer2() {
     let mut api = ApiTestInstance;
-    api.call_native_transfer2(1u8,&_from,&_to,U256::from(500));
+    api.save("1111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+             "1111111111111111111111111111111111111111111111111111111111111111111111111111111111111");
+    let a = api.get("1111111111111111111111111111111111111111111111111111111111111111111111111111111111111");
+    println!("res:{}", a);
     assert_eq!(false, true)
 }
 

@@ -1,5 +1,7 @@
 use super::types::{Address, H160};
 use super::{vec, Vec};
+use super::prelude::*;
+use super::console;
 
 mod env {
     extern "C" {
@@ -15,7 +17,7 @@ mod env {
         pub fn get_input(dst: *mut u8);
         pub fn call_contract(addr: *const u8, input_ptr: *const u8, input_len: u32) -> i32;
         pub fn call_output_length() -> u32;
-        pub fn get_output(dst: *mut u8);
+        pub fn get_call_output(dst: *mut u8);
         pub fn current_blockhash(blockhash: *const u8) -> u32;
         pub fn current_txhash(txhash: *const u8) -> u32;
         pub fn contract_migrate(code:*const u8, code_len: u32, vm_type:u32, name_ptr:*const u8,
@@ -46,7 +48,7 @@ pub fn call_contract(addr: &Address, input: &[u8]) -> Option<Vec<u8>> {
     if size != 0 {
         let value = &mut output[..];
         unsafe {
-            env::get_output(value.as_mut_ptr());
+            env::get_call_output(value.as_mut_ptr());
         }
     }
 
@@ -104,7 +106,6 @@ pub fn storage_read(key: &[u8]) -> Option<Vec<u8>> {
             env::storage_read(key.as_ptr(), key.len() as u32, value.as_mut_ptr(), value.len() as u32, INITIAL as u32)
         };
     }
-
     Some(val)
 }
 
