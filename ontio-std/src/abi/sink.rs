@@ -69,6 +69,10 @@ impl Sink {
         self.write_byte(20);
         self.write(address);
     }
+    pub fn write_neovm_address(&mut self, address: &Address) {
+        self.write_varuint(20);
+        self.write(address);
+    }
     pub fn write_native_varuint(&mut self, val:u64) {
         if val < 0xFD {
             self.write_byte(1);

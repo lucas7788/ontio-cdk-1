@@ -121,6 +121,11 @@ impl Decoder for H256 {
         Ok(hash)
     }
 }
+impl Encoder for H256 {
+    fn encode(self, sink: &mut Sink) {
+        sink.write_bytes(self.as_ref())
+    }
+}
 
 impl Encoder for &H256 {
     fn encode(self, sink: &mut Sink) {

@@ -1,4 +1,4 @@
-use super::types::{Address, H160};
+use super::types::{Address, H256};
 use super::{vec, Vec};
 use super::prelude::*;
 use super::console;
@@ -125,7 +125,6 @@ pub fn address() -> Address {
     unsafe {
         env::self_address(addr.as_mut().as_mut_ptr());
     }
-
     addr
 }
 ///return Caller's contract address
@@ -145,16 +144,22 @@ pub fn entry_address() -> Address {
     addr
 }
 ///return current block hash
-pub fn current_blockhash(blockhash: &H160) -> u32 {
+pub fn current_blockhash() -> H256 {
+    let temp:[u8;32] = [0;32];
+    let block_hash = H256::new(temp);
     unsafe {
-        env::current_blockhash(blockhash.as_ptr())
+        env::current_blockhash(block_hash.as_ptr());
     }
+    block_hash
 }
 ///return current tx hash
-pub fn current_txhash(txhash: &H160) -> u32 {
+pub fn current_txhash() -> H256 {
+    let temp:[u8;32] = [0;32];
+    let tx_hash = H256::new(temp);
     unsafe {
-        env::current_txhash(txhash.as_ptr())
+        env::current_txhash(tx_hash.as_ptr());
     }
+    tx_hash
 }
 ///Check signature
 pub fn check_witness(addr: &Address) -> bool {

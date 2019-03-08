@@ -1,6 +1,7 @@
 /// implement common types
 use fixed_hash::construct_fixed_hash;
 use crate::vec::Vec;
+use crate::abi::{Encoder, Sink};
 
 construct_fixed_hash! {
     pub struct H256(32);
