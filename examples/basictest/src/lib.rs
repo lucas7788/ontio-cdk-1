@@ -7,19 +7,20 @@ use ostd::abi::Dispatcher;
 use ostd::{runtime, console, database};
 use ostd::abi::{Sink, Source, Decoder};
 use ostd::types::{H160,to_neo_bytes};
-use ostd::contract::ont;
 use ostd::str;
-
 #[ostd::abi_codegen::contract]
-pub trait ApiTest {
+pub trait BasicTest {
     fn save(&self, key:&str, value:&str) -> bool;
     fn get(&self, key:&str) -> String;
     fn get_put(&self) -> String;
+    fn delete(&self, key:&str) -> bool;
+    fn migrate(&self, code: &[u8], vm_type: u32, name:&str, version:&str,author: &str, email:&str,
+               desc:&str) -> bool;
 }
 
-pub(crate) struct ApiTestInstance;
+pub(crate) struct BasicTestInstance;
 
-impl ApiTest for ApiTestInstance {
+impl ApiTest for BasicTestInstance {
     fn save(&self, key:&str, value:&str) -> bool {
         database::put(key, value);
         true
@@ -40,12 +41,21 @@ impl ApiTest for ApiTestInstance {
         database::put("key", value.to_vec());
         database::get("key").unwrap()
     }
+    fn delete(&self, key:&str) -> bool {
+        database::delete(key);
+        true
+    }
+    fn migrate(&self, code: &[u8], vm_type: u32, name:&str, version:&str,author: &str, email:&str,
+               desc:&str) -> bool {
+        runtime::contract_migrate(code, vm_type, name, version, author, email, desc);
+        true
+    }
 }
 
 
 #[no_mangle]
 pub fn invoke() {
-    let mut dispatcher =  ApiTestDispatcher::new(ApiTestInstance);
+    let mut dispatcher =  BasicTestDispatcher::new(BasicTestInstance);
     runtime::ret(&dispatcher.dispatch(&runtime::input()));
 }
 

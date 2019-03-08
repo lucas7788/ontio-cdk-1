@@ -1,6 +1,6 @@
 extern crate hexutil;
 extern crate ontio_std as ostd;
-use crate::{ApiTest,ApiTestInstance};
+use crate::{BasicTest,BasicTestInstance};
 use ostd::types::Address;
 use ostd::abi::{Sink, Source};
 use ostd::types::{U256,to_neo_bytes};
@@ -13,7 +13,7 @@ const _to: Address = ostd::base58!("AbPRaepcpBAFHz9zCj4619qch4Aq5hJARA");
 
 #[test]
 fn call_trasnfer2() {
-    let mut api = ApiTestInstance;
+    let mut api = BasicTestInstance;
     api.save("1111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
              "1111111111111111111111111111111111111111111111111111111111111111111111111111111111111");
     let a = api.get("1111111111111111111111111111111111111111111111111111111111111111111111111111111111111");
