@@ -11,6 +11,7 @@ members = [
     "examples/helloworld2",
     "examples/abigen",
     "examples/apitest",
+    "examples/fibtest",
 ]
 
 [profile.release]

@@ -16,6 +16,7 @@ impl Encoder for u8 {
         sink.write_byte(self)
     }
 }
+
 impl Encoder for &u8 {
     fn encode(self, sink: &mut Sink) {
         sink.write_byte(*self)

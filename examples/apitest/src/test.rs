@@ -13,7 +13,6 @@ const _to: Address = ostd::base58!("AbPRaepcpBAFHz9zCj4619qch4Aq5hJARA");
 #[test]
 fn call_trasnfer2() {
     let mut api = ApiTestInstance;
-    api.call_native_transfer2(1u8,&_from,&_to,U256::from(500));
     assert_eq!(false, true)
 }
 
