@@ -12,6 +12,7 @@ members = [
     "examples/abigen",
     "examples/apitest",
     "examples/fibtest",
+    "examples/token-codegen2",
 ]
 
 [profile.release]
