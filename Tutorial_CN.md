@@ -18,10 +18,13 @@
 ## ontio-std介绍
 
 1. abi 模块
+
 `Sink`  : 用于合约中数据类型的序列化
+
 `Source`: 用于合约中数据类型的反序列化
 
 2. abi_codegen模块
+
 为基本的数据类型实现encoder和decoder接口，方便开发者在合约中序列化和反序列化数据。
 
 3. console 模块
@@ -29,16 +32,18 @@
 
 4. contract模块
 `ong`：封装了在合约中调用ong的相关操作，例如转账、查询余额等。
+
 调用示例：
 ```
 use ostd::contract::ont;
 ong::balance_of(address)
 ```
 `ont`:封装了在合约中调用ont的相关操作,调用方法和ong类似。
+
 5. database 模块
-`delete`: 根据key删除数据库中的数据
-`get`   : 根据key查询数据
-`put`   : 根据key存储数据
+- `delete`: 根据key删除数据库中的数据
+- `get`   : 根据key查询数据
+- `put`   : 根据key存储数据
 
 示例：
 ```
@@ -47,7 +52,7 @@ database::put(from, frmbal);
 ```
 
 6. types 模块
-- `Address`: 地址，是长度为20的字节数据。
+- `Address`: 地址，是长度为20的字节数
 - `U256`   : 小端序的大整数。
 
 7. runtime 模块
