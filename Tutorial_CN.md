@@ -10,10 +10,59 @@
 克隆`https://github.com/ontio/ontology-wasm-cdt-rust.git`项目到本地，然后进入项目根目录，执行`cargo doc`命令生成api文档。
 
 2. 合约中数据类型转换
+- `u32`、`u64`等基本的数据类型转换成`U256`
+- `U256`转换成`u64`、`u32`等数据类型
+详情请参考api文档中`U256`类型的方法
 
+示例
+```
+let u = U256::from(1);
+let n = u.as_u64();
+```
+- `u64`转换成`string`
+示例
+```
+let s = format!("{}", 123);
+```
+- `base58`编码的地址转换成`Address`
+示例
+```
+let address = ostd::base58!("AFmseVrdL9f9oyCzZefL9tG6UbvhPbdYzM");
+```
 3. 合约中验证签名
-
+示例
+```
+let flag = runtime::check_witness(&from);
+```
 4. 合约与链交互
+
+请参考runtime模块介绍
+
+5. 合约与合约交互
+在合约中调用其他合约时，需要按照目标合约的参数序列化标准序列化参数。
+- `wasm`合约调用`neovm`合约
+ - `U256`数据类型的序列化，需要先调用`types::to_neo_bytes()`方法转换成字节数组，然后在序列化。
+ - `Address`数据类型要用`sink.write_neovm_address()`方法序列化。
+ - 参数序列化步骤
+   1. 先序列化要调用合约中方法的参数，目标合约的方法参数要按照倒序的方式序列化
+   2. 方法参数序列化完成后，再序列化`83u8`和`193u8`字节码
+   3. 序列化方法名
+   4. 序列化字节码`103u8`
+   5. 序列化合约地址
+```
+let mut sink = Sink::new(16);
+sink.write(to_neo_bytes(amount));
+sink.write_neovm_address(to);
+sink.write_neovm_address(from);
+sink.write(83u8);
+sink.write(193u8);
+sink.write("transfer".to_string());
+sink.write(103u8);
+sink.write(contract_address);
+let res = runtime::call_contract(contract_address, sink.bytes());
+```
+- `wasm`调用`native`
+ - `wasm`调用`ont`和`ong`中的方法请参考contract模块
 
 ## ontio-std介绍
 
@@ -21,23 +70,45 @@
 - `Sink`  : 用于合约中数据类型的序列化
 - `Source`: 用于合约中数据类型的反序列化
 
-2. abi_codegen模块
-
-为基本的数据类型实现encoder和decoder接口，方便开发者在合约中序列化和反序列化数据。
 
 3. console 模块
 
-`debug`：用于在合约中打印调试信息
+- `debug`：用于在合约中打印调试信息
 
 4. contract模块
 - `ong`：封装了在合约中调用ong的相关操作，例如转账、查询余额等。
-- `ont`:封装了在合约中调用ont的相关操作,调用方法和ong类似。
-
-调用示例：
+ - `allowance(from: &Address, to: &Address)` 查询allowance余额
+ 示例
 ```
 use ostd::contract::ont;
-ong::balance_of(address)
+ont::allowance(from, to)
 ```
+ - `approve(from: &Address, to: &Address, amount: U256)` 一个地址允许另一个地址转移多少资产
+ 示例
+```
+use ostd::contract::ont;
+ont::approve(from, to, amount)
+```
+ - `balance_of` 查询余额
+ 示例：
+ ```
+ use ostd::contract::ont;
+ ong::balance_of(address)
+ ```
+ - `transfer` 转账
+ 示例
+```
+let state = ont::State { from: from.clone(), to: to.clone(), amount: amount };
+ont::transfer(&[state])
+```
+ - `transfer_from`
+ 示例
+```
+ont::transfer_from(sender, from, to, amount)
+```
+- `ont`:封装了在合约中调用ont的相关操作,调用方法和ong类似。
+
+
 
 5. database 模块
 - `delete`: 根据key删除数据库中的数据
