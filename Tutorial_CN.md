@@ -62,18 +62,38 @@ sink.write(contract_address);
 let res = runtime::call_contract(contract_address, sink.bytes());
 ```
 - `wasm`调用`native`
- - `wasm`调用`ont`和`ong`中的方法请参考contract模块
+  - `wasm`调用`ont`和`ong`中的方法请参考contract模块
 
 ## ontio-std介绍
 
 1. abi 模块
 - `Sink`  : 用于合约中数据类型的序列化
-- `Source`: 用于合约中数据类型的反序列化
+对于实现`Encoder`接口的数据类型都可以直接用`sink.write()`方法进行序列化,
+`sink`进行初始化的时候,会初始化一个Vec,需要指定其初始化大小。
+示例
+```
+let mut sink = Sink::new(16);
+sink.write(83u8);
+sink.write("transfer".to_string());
+```
 
+- `Source`: 用于合约中数据类型的反序列化
+对于实现`Decoder`接口类型的数据类型可以直接用`source.read().unwrap()`方法进行反序列化
+示例
+```
+let input = runtime::input();
+let mut source = ZeroCopySource::new(&input);
+let (from, to, amount) = source.read().unwrap();
+```
 
 3. console 模块
 
 - `debug`：用于在合约中打印调试信息
+
+示例
+```
+ console::debug("debug");
+```
 
 4. contract模块
 - `ong`：封装了在合约中调用ong的相关操作，例如转账、查询余额等。
