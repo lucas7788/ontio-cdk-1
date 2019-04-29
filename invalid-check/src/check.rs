@@ -21,13 +21,15 @@ pub fn check(p: &str) {
             let locals = body.locals();
             for local in locals {
                 if common::is_invalid_value_type(&local.value_type()) {
-                    panic!("function body local value type is invalid");
+                    println!("invalid value type: {}", local.value_type());
+                    return;
                 }
             }
             let instructions = body.code();
             for instruction in instructions.elements() {
                 if common::is_invalid_instruction(&instruction) {
-                    panic!("invalid instruction");
+                    println!("invalid instruction: {}", instruction);
+                    return;
                 }
             }
         }
@@ -36,73 +38,69 @@ pub fn check(p: &str) {
         let entries = global_section.entries();
         for entry in entries {
             if common::is_invalid_value_type(&entry.global_type().content_type()) {
-                panic!("global entry value type is invalid");
+                println!("global type content type is invalid: {}", &entry.global_type().content_type());
+                return;
             }
             if common::is_invalid_init_expr(entry.init_expr()) {
-                panic!("invalid global init expression instruction");
+                return;
             }
         }
     }
     if let Some(import_section) = module.import_section() {
         let import_sections = import_section.entries();
         for import_entry in import_sections {
-            println!("import_entry:{:?}", import_entry);
             match import_entry.external() {
                 External::Global(external_gloal_type) => {
                     if common::is_invalid_value_type(&external_gloal_type.content_type()) {
-                        panic!("import section use invalid value type");
+                        println!("import section use invalid value type: {}", external_gloal_type.content_type());
+                        return;
                     }
                 }
                 _ => {}
             };
-            if let Some(func_index) = common::get_import_func_index(import_entry) {
-                if let Some(type_section) = module.type_section() {
-                    let types = type_section.types();
-                    let mut index = 0u32;
-                    for ty in types {
-                        match ty {
-                            Type::Function(t) => {
-                                let param = t.params();
-                                for value_type in param {
-                                    if common::is_invalid_value_type(value_type) {
-                                        panic!("[function parameter type is wrong], not supported data type");
+            let func_index_temp = common::get_import_func_index(import_entry);
+            match func_index_temp {
+                Ok(func_index) =>{
+
+                    if let Some(type_section) = module.type_section() {
+                        let types = type_section.types();
+                        let mut index = 0u32;
+                        for ty in types {
+                            match ty {
+                                Type::Function(t) => {
+                                    let param = t.params();
+                                    for value_type in param {
+                                        if common::is_invalid_value_type(value_type) {
+                                            println!("invalid function parameter type: {}", value_type);
+                                            return;
+                                        }
                                     }
-                                }
-                                if let Some(ret_type) = t.return_type() {
-                                    if common::is_invalid_value_type(&ret_type) {
-                                        panic!("function return type is wrong")
+                                    if let Some(ret_type) = t.return_type() {
+                                        if common::is_invalid_value_type(&ret_type) {
+                                            println!("invalid function return type: {}", ret_type);
+                                            return;
+                                        }
                                     }
+                                    if let Some(func_name) = func_index.get(&index) {
+                                        let res = common::check_type(func_name, t);
+                                        match res {
+                                            Ok(_) => {}
+                                            Err(e) => {
+                                                println!("check_type failed: {}", e);
+                                                return;
+                                            }
+                                        }
+                                    }
+                                    index += 1;
                                 }
-                                if let Some(func_name) = func_index.get(&index) {
-                                    common::is_invalid_type(func_name, t);
-                                }
-                                index += 1;
+                                _ => {}
                             }
-                            _ => {}
                         }
                     }
                 }
-            }
-        }
-    }
-    if let Some(type_section) = module.type_section() {
-        let types = type_section.types();
-        for ty in types {
-            match ty {
-                Type::Function(t) => {
-                    let param = t.params();
-                    for value_type in param {
-                        if common::is_invalid_value_type(value_type) {
-                            panic!("[function parameter type is wrong], not supported data type");
-                        }
-                    }
-                    if let Some(ret_type) = t.return_type() {
-                        if common::is_invalid_value_type(&ret_type) {
-                            panic!("function return type is wrong")
-                        }
-                    }
+                Err(e) => {
+                    println!("get_import_func_index failed: {}", e);
                 }
-                _ => {}
             }
         }
     }
@@ -111,7 +109,7 @@ pub fn check(p: &str) {
         for data_segment in data_segments {
             if let Some(init_expr) = data_segment.offset() {
                 if common::is_invalid_init_expr(init_expr) {
-                    panic!("data section use invalid init expr");
+                    return;
                 }
             }
         }
@@ -121,7 +119,8 @@ pub fn check(p: &str) {
         for entry in entries {
             if let Some(init_expr) = entry.offset() {
                 if common::is_invalid_init_expr(init_expr) {
-                    panic!("elements use invalid init_expr");
+                    println!("elements use invalid init_expr: init_expr");
+                    return;
                 }
             }
         }

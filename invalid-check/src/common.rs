@@ -8,10 +8,10 @@ const VALID_FIELD :[&str;19]= ["timestamp", "block_height","self_address","calle
 "ret","notify","input_length","get_input","call_contract","call_output_length","get_output","current_blockhash",
 "current_txhash","contract_migrate","storage_read","storage_write","storage_delete"];
 
-pub fn get_import_func_index (import_entry:&ImportEntry) -> Option<BTreeMap<&u32, &str>> {
+pub fn get_import_func_index (import_entry:&ImportEntry) -> Result<BTreeMap<&u32, &str>, String> {
     if import_entry.module() == "env" {
         if !VALID_FIELD.contains(&import_entry.field()) {
-            panic!("import section use invalid field: {}", import_entry.field());
+            return Err(format!("import section use invalid field: {}", import_entry.field()));
         }
         let mut func_index:BTreeMap<&u32, &str> = BTreeMap::new();
         match import_entry.external() {
@@ -20,117 +20,71 @@ pub fn get_import_func_index (import_entry:&ImportEntry) -> Option<BTreeMap<&u32
             }
             _ => {}
         }
-        return Some(func_index);
+        return Ok(func_index);
     }
-    return None;
+    return Ok(BTreeMap::new());
 }
-pub fn is_invalid_type(func_name: &str,func_type: &FunctionType) {
+pub fn check_type(func_name: &str, func_type: &FunctionType) -> Result<(), String> {
     match func_name {
         "timestamp" => {
-            let params = func_type.params();
-            if params.len() != 0 {
-                panic!("function name:{}, length of parameter expected 0, got {}", func_name, params.len());
-            }
-            if let Some(ret_type) = func_type.return_type() {
-                if ret_type != ValueType::I64 {
-                    panic!("function name: {}, return value type expected i64, got {}", func_name, ret_type);
-                }
-            }
+            let expected_params:&[ValueType] = &[];
+            check_signature(func_name, expected_params, Some(ValueType::I64), func_type)?;
         }
         "block_height"|"input_length"|"call_output_length" => {
-            let params = func_type.params();
-            if params.len() != 0 {
-                panic!("function name:{}, length of parameter expected 0, got {}", func_name, params.len());
-            }
-            if let Some(ret_type) = func_type.return_type() {
-                if ret_type != ValueType::I32 {
-                    panic!("function name:{}, return value type expected i32, got:{}", func_name, ret_type);
-                }
-            }
+            let expected_params:&[ValueType] = &[];
+            check_signature(func_name, expected_params, Some(ValueType::I32), func_type)?;
         }
         "self_address"|"caller_address"|"entry_address"|"get_input"|"get_output" => {
-            let params = func_type.params();
-            if params.len() != 1 {
-                panic!("function name: {}, length of parameter expected 1, got {}", func_name, params.len());
-            }
-            if let Some(ret_type) = func_type.return_type() {
-                panic!("function name:{}, return value type expected None, got {}", func_name, ret_type);
-            }
+            let expected_params:&[ValueType] = &[ValueType::I32];
+            check_signature(func_name, expected_params, None, func_type)?;
         }
         "check_witness"|"current_blockhash"|"current_txhash" => {
-            let params = func_type.params();
-            if params.len() != 1 {
-                panic!("function name:{}, length of parameter expected 1, got {}", func_name, params.len());
-            }
-            if let Some(ret_type) = func_type.return_type() {
-                if ret_type != ValueType::I32 {
-                    panic!("function name:{}, return value type expected i32, got {}", func_name, ret_type);
-                }
-            }
+            let expected_params:&[ValueType] = &[ValueType::I32];
+            check_signature(func_name, expected_params, Some(ValueType::I32), func_type)?;
         }
         "ret" => {
-            let params = func_type.params();
-            if params.len() != 2 {
-                panic!("function name:{}, length of parameter expected 2, got {}", func_name, params.len());
-            }
-            if let Some(ret_type) = func_type.return_type() {
-                panic!("function name:{}, return value type expected None, got {}", func_name, ret_type);
-            }
+            let expected_params:&[ValueType] = &[ValueType::I32, ValueType::I32];
+            check_signature(func_name, expected_params, None, func_type)?;
         }
         "call_contract" => {
-            let params = func_type.params();
-            if params.len() != 3 {
-                panic!("function name:{}, length of parameter expected 3, got {}", func_name, params.len());
-            }
-            if let Some(ret_type) = func_type.return_type() {
-                if ret_type != ValueType::I32 {
-                    panic!("function name: {}, return value expected i32, got {}", func_name, ret_type);
-                }
-            }
+            let expected_params:&[ValueType] = &[ValueType::I32, ValueType::I32, ValueType::I32];
+            check_signature(func_name, expected_params, Some(ValueType::I32), func_type)?;
         }
         "contract_migrate" => {
-            let params = func_type.params();
-            if params.len() != 14 {
-                panic!("function name:{}, length of parameter expected 4, got {}", func_name, params.len());
-            }
-            if let Some(ret_type) = func_type.return_type() {
-                if ret_type != ValueType::I32 {
-                    panic!("function name:{}, return value type expected i32, got {}", func_name, ret_type);
-                }
-            }
+            let expected_params:&[ValueType] = &[ValueType::I32, ValueType::I32, ValueType::I32,ValueType::I32,
+                ValueType::I32,ValueType::I32,ValueType::I32,ValueType::I32,ValueType::I32,ValueType::I32,
+                ValueType::I32,ValueType::I32,ValueType::I32,ValueType::I32];
+            check_signature(func_name, expected_params, Some(ValueType::I32), func_type)?;
         }
         "storage_read" => {
-            let params = func_type.params();
-            if params.len() != 5 {
-                panic!("function name:{}, length of parameter expected 4, got {}", func_name, params.len());
-            }
-            if let Some(ret_type) = func_type.return_type() {
-                if ret_type != ValueType::I32 {
-                    panic!("function name:{}, return value type expected i32, got {}", func_name, ret_type);
-                }
-            }
+            let expected_params:&[ValueType] = &[ValueType::I32, ValueType::I32, ValueType::I32,ValueType::I32, ValueType::I32];
+            check_signature(func_name, expected_params, Some(ValueType::I32), func_type)?;
         }
         "storage_write" => {
-            let params = func_type.params();
-            if params.len() != 4 {
-                panic!("function name:{}, length of parameter expected 4, got {}", func_name, params.len());
-            }
-            if let Some(ret_type) = func_type.return_type() {
-                panic!("function name:{}, return value type expected None, got {}", func_name, ret_type);
-            }
+            let expected_params:&[ValueType] = &[ValueType::I32, ValueType::I32, ValueType::I32,ValueType::I32];
+            check_signature(func_name, expected_params, None, func_type)?;
         }
         "storage_delete" => {
-            let params = func_type.params();
-            if params.len() != 2 {
-                panic!("function timestamp has wrong parameter number");
-            }
-            if let Some(ret_type) = func_type.return_type() {
-                panic!("function name:{}, return value type expected None, got {}", func_name, ret_type);
-            }
+            let expected_params:&[ValueType] = &[ValueType::I32, ValueType::I32];
+            check_signature(func_name, expected_params, None, func_type)?;
         }
-        _ => {}
+        _ => {
+            return Ok(());
+        }
+    }
+    return Ok(());
+}
+
+fn check_signature(func_name: &str, expected_param: &[ValueType], expected_ret: Option<ValueType>, func_type: &FunctionType) -> Result<(), String> {
+    if expected_param != func_type.params() {
+        return Err(format!("function name:{}, parameter expected {:?}, got {:?}", func_name, expected_param, func_type.params()));
+    } else if expected_ret != func_type.return_type() {
+        return Err(format!("function name: {}, return value type expected {}, got {}", func_name, expected_ret.unwrap(), func_type.return_type().unwrap()));
+    } else {
+        return Ok(());
     }
 }
+
 pub fn is_invalid_instruction(instruction: &Instruction) -> bool {
     let instruction_str = format!("{}", instruction);
     if instruction_str.contains("f32") || instruction_str.contains("f64") {
@@ -142,7 +96,6 @@ pub fn is_invalid_instruction(instruction: &Instruction) -> bool {
 pub fn is_invalid_value_type(value_type: &ValueType) -> bool {
     match value_type {
         ValueType::F32|ValueType::F64 => {
-            println!("invalid value type: {}", value_type);
             return true
         }
         _ => {
@@ -151,7 +104,7 @@ pub fn is_invalid_value_type(value_type: &ValueType) -> bool {
     }
 }
 pub fn is_invalid_init_expr(init_expr: &InitExpr) -> bool {
-    for expr in init_expr.code(){
+    for expr in init_expr.code() {
         if is_invalid_instruction(&expr) {
             println!("invalid expr: {}", expr);
             return true;
