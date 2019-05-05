@@ -10,7 +10,7 @@ members = [
     "examples/oep5token",
     "examples/oep8token",
     "examples/apitest",
-    "invalid-check",
+    "ontio-wasm-check",
 ]
 
 [profile.release]
