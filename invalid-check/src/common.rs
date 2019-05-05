@@ -1,7 +1,6 @@
 
 use parity_wasm::elements::{Instruction, ValueType,InitExpr, ImportEntry,External,FunctionType};
 use parity_wasm::elements::opcodes::*;
-use std::vec::{Vec};
 use std::collections::btree_map::BTreeMap;
 
 const VALID_FIELD :[&str;19]= ["timestamp", "block_height","self_address","caller_address","entry_address","check_witness",
@@ -103,12 +102,11 @@ pub fn is_invalid_value_type(value_type: &ValueType) -> bool {
         }
     }
 }
-pub fn is_invalid_init_expr(init_expr: &InitExpr) -> bool {
+pub fn is_invalid_init_expr(init_expr: &InitExpr) -> Result<(), String> {
     for expr in init_expr.code() {
         if is_invalid_instruction(&expr) {
-            println!("invalid expr: {}", expr);
-            return true;
+            return Err(format!("invalid expr: {}", expr));
         }
     }
-    false
+    Ok(())
 }

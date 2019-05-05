@@ -12,5 +12,7 @@ name = "check"
 path ="src/main.rs"
 
 [dependencies]
-parity-wasm = "0.35"
+parity-wasm = "0.31"
+wasmi = "0.4.5"
+wabt = "0.6"
 clap = "2.26.0"

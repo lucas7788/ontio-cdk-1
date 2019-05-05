@@ -1,6 +1,6 @@
 extern crate clap;
 use clap::{App,Arg};
-use invalid_check::check::check;
+use invalid_check::check_wasm::check;
 fn main() {
     let matches = App::new("Check")
         .version("0.1.0")
