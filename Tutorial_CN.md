@@ -139,10 +139,11 @@ ont::transfer_from(sender, from, to, amount)
 ```
 use ostd::database;
 database::put(from, frmbal);
+let balance = database::get(owner).unwrap_or(U256::zero());
 ```
 
 6. types 模块
-- `Address`: 地址，是长度为20的字节数
+- `Address`: 地址，是长度为20的字节数组
 - `U256`   : 小端序的大整数。
 
 7. runtime 模块
