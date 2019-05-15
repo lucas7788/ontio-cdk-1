@@ -61,7 +61,9 @@ impl NodeTree {
     pub fn flush(&mut self) {
         let mut root = &mut self.root;
         if let Some(root) = root {
-            root.flush();
+            for (_, item) in root.children.iter_mut().enumerate() {
+                item.flush();
+            }
             let mut sink = Sink::new(16);
             self.encode(&mut sink);
             put(&self.key, sink.bytes());
