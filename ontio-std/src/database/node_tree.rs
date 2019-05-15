@@ -90,8 +90,8 @@ impl NodeTree {
 
 pub fn open(key: Vec<u8>) -> Result<NodeTree, Error> {
     let tree = get(key.clone());
-    if tree.is_some() {
-        let mut source = Source::new(tree.unwrap());
+    if let Some(t) = tree {
+        let mut source = Source::new(t);
         return NodeTree::decode(&mut source);
     } else {
         return Ok(new_tree(key));
@@ -195,8 +195,8 @@ fn insert_inner(
         depth += current_node.clone().prefix_len;
     }
     let mut next = current_node.find_child_mut(key.get(depth as usize).unwrap().to_owned());
-    if next.is_some() {
-        return insert_inner(next.unwrap(), &key, value, depth + 1);
+    if let Some(node) = next {
+        return insert_inner(node, &key, value, depth + 1);
     } else {
         current_node
             .add_child(key.get(depth as usize).unwrap().to_owned(), &new_leaf_node(&key, &value));
