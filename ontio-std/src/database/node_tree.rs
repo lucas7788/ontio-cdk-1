@@ -1,7 +1,8 @@
 #![feature(inner_deref)]
-use crate::abi::{Decoder, Encoder, Sink};
+use crate::abi::{Decoder, Encoder, Error, Sink, Source};
 use crate::cmp::min;
 use crate::database::node;
+use crate::database::{get, put};
 use crate::vec::Vec;
 
 const MAX_PREFIX_LEN: u32 = 10;
@@ -10,6 +11,7 @@ const MAX_PREFIX_LEN: u32 = 10;
 pub struct NodeTree {
     pub root: Option<node::Node>,
     pub size: u64,
+    pub key: Vec<u8>,
 }
 
 fn new_leaf_node(key: &Vec<u8>, value: &Vec<u8>) -> node::Node {
@@ -22,6 +24,7 @@ fn new_leaf_node(key: &Vec<u8>, value: &Vec<u8>) -> node::Node {
         prefix: Vec::new(),
         prefix_len: 0,
         size: 0,
+        need_flush: true,
         key: new_key,
         key_size: 0,
         value: value.to_owned(),
@@ -30,16 +33,39 @@ fn new_leaf_node(key: &Vec<u8>, value: &Vec<u8>) -> node::Node {
 }
 
 impl Drop for NodeTree {
-    fn drop(&mut self) {}
+    fn drop(&mut self) {
+        self.flush();
+    }
 }
 
 impl Encoder for NodeTree {
-    fn encode(&self, sink: &mut Sink) {}
+    fn encode(&self, sink: &mut Sink) {
+        sink.write(&self.key);
+        sink.write_u64(self.size);
+        if let Some(root) = &self.root {
+            root.encode(sink);
+        }
+    }
+}
+
+impl Decoder for NodeTree {
+    fn decode(source: &mut Source) -> Result<Self, Error> {
+        let key = source.read().unwrap();
+        let size = source.read().unwrap();
+        let root = node::Node::decode(source).unwrap();
+        return Ok(NodeTree { root: Some(root), size, key });
+    }
 }
 
 impl NodeTree {
-    pub fn new_tree() -> NodeTree {
-        return NodeTree { root: None, size: 0 };
+    pub fn flush(&mut self) {
+        let mut root = &mut self.root;
+        if let Some(root) = root {
+            root.flush();
+            let mut sink = Sink::new(16);
+            self.encode(&mut sink);
+            put(&self.key, sink.bytes());
+        }
     }
     pub fn insert(&mut self, key: &Vec<u8>, value: &Vec<u8>) {
         let key = ensure_null_terminated_key(&mut key.to_vec());
@@ -59,6 +85,21 @@ impl NodeTree {
         return search_inner(&mut self.root.clone().unwrap(), &key, 0);
     }
 }
+
+pub fn open(key: Vec<u8>) -> Result<NodeTree, Error> {
+    let tree = get(key.clone());
+    if tree.is_some() {
+        let mut source = Source::new(tree.unwrap());
+        return NodeTree::decode(&mut source);
+    } else {
+        return Ok(new_tree(key));
+    }
+}
+
+pub fn new_tree(key: Vec<u8>) -> NodeTree {
+    return NodeTree { root: None, size: 0, key };
+}
+
 fn search_inner(current_node: &mut node::Node, key: &Vec<u8>, mut depth: u32) -> Option<Vec<u8>> {
     if current_node.is_leaf() {
         if current_node.is_match(key) {
@@ -195,8 +236,21 @@ fn ensure_null_terminated_key(key: &mut Vec<u8>) -> Vec<u8> {
 }
 
 #[test]
+fn test2() {
+    let mut t = new_tree("key".as_bytes().to_vec());
+    let key = "abc".as_bytes().to_vec();
+    let value = "value1".as_bytes().to_vec();
+    t.insert(&key, &value);
+    println!("t1: {:?}", t);
+    t.flush();
+    let t2 = open("key".as_bytes().to_vec());
+    println!("t2: {:?}", t2.unwrap());
+    assert_eq!(1, 2);
+}
+
+#[test]
 fn test() {
-    let mut t = NodeTree::new_tree();
+    let mut t = new_tree("key".as_bytes().to_vec());
     let key = "abc".as_bytes().to_vec();
     let value = "value1".as_bytes().to_vec();
     t.insert(&key, &value);

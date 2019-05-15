@@ -32,6 +32,7 @@ pub struct Node {
     pub prefix: Vec<u8>,
     pub prefix_len: u32,
     pub size: u32,
+    pub need_flush: bool,
 
     // Leaf Node Attributes
     pub key: Vec<u8>,
@@ -80,6 +81,7 @@ impl Decoder for Node {
             prefix,
             prefix_len,
             size,
+            need_flush: false,
             key,
             key_size,
             value,
@@ -89,6 +91,18 @@ impl Decoder for Node {
 }
 
 impl Node {
+    pub fn flush(&mut self) {
+        if self.children.len() != 0 {
+            for (i, item) in self.children.iter_mut().enumerate() {
+                item.flush();
+            }
+        }
+        if self.need_flush {
+            let mut sink = Sink::new(16);
+            self.encode(&mut sink);
+            database::put(&self.key, sink.bytes());
+        }
+    }
     pub fn is_leaf(&self) -> bool {
         self.node_type == LEAF
     }
@@ -415,6 +429,7 @@ pub fn new_node(node_type: u8) -> Node {
                 prefix: Vec::with_capacity(MAX_PREFIX_LEN as usize),
                 prefix_len: 0,
                 size: 0,
+                need_flush: true,
                 key: Vec::new(),
                 key_size: 0,
                 value: Vec::new(),
@@ -429,6 +444,7 @@ pub fn new_node(node_type: u8) -> Node {
                 prefix: Vec::with_capacity(MAX_PREFIX_LEN as usize),
                 prefix_len: 0,
                 size: 0,
+                need_flush: true,
                 key: Vec::new(),
                 key_size: 0,
                 value: Vec::new(),
@@ -444,6 +460,7 @@ pub fn new_node(node_type: u8) -> Node {
         prefix: Vec::new(),
         prefix_len: 0,
         size: 0,
+        need_flush: true,
         key: Vec::new(),
         key_size: 0,
         value: Vec::new(),
