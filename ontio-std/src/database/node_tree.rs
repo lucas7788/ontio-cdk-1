@@ -17,7 +17,7 @@ pub struct NodeTree {
 fn new_leaf_node(key: &Vec<u8>, value: &Vec<u8>) -> node::Node {
     let mut new_key = Vec::with_capacity(key.len());
     new_key.extend(key);
-    return node::Node {
+    let node = return node::Node {
         keys: Vec::new(),
         children: Vec::new(),
         children_bytes: Vec::new(),
@@ -127,6 +127,8 @@ fn insert_inner(
 ) -> bool {
     if current_node.is_leaf() {
         if current_node.is_match(&key) {
+            current_node.value = value.to_owned();
+            current_node.need_flush = true;
             return false;
         }
         let mut new_node4 = node::new_node(node::NODE4);
@@ -235,6 +237,19 @@ fn ensure_null_terminated_key(key: &mut Vec<u8>) -> Vec<u8> {
         None => {}
     }
     return key.to_vec();
+}
+
+#[test]
+fn test3() {
+    let mut t = new_tree("key".as_bytes().to_vec());
+    let key = "abc".as_bytes().to_vec();
+    let value = "value1".as_bytes().to_vec();
+    t.insert(&key, &value);
+    println!("t1: {:?}", t);
+    let value2 = "value2".as_bytes().to_vec();
+    t.insert(&key, &value2);
+    println!("t2: {:?}", t);
+    assert_eq!(1, 2);
 }
 
 #[test]
