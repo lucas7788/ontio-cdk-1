@@ -242,20 +242,38 @@ fn ensure_null_terminated_key(key: &mut Vec<u8>) -> Vec<u8> {
 #[test]
 fn test3() {
     let mut t = new_tree("key".as_bytes().to_vec());
-    let key = "abc".as_bytes().to_vec();
+    let key = "abc1".as_bytes().to_vec();
     let value = "value1".as_bytes().to_vec();
     t.insert(&key, &value);
     println!("t1: {:?}", t);
-    let value2 = "value2".as_bytes().to_vec();
-    t.insert(&key, &value2);
+
+    let key = "abc2".as_bytes().to_vec();
+    let value = "value2".as_bytes().to_vec();
+    t.insert(&key, &value);
     println!("t2: {:?}", t);
+
+    let key = "abc3".as_bytes().to_vec();
+    let value = "value3".as_bytes().to_vec();
+    t.insert(&key, &value);
+    println!("t3: {:?}", t);
+
+    let key = "abc4".as_bytes().to_vec();
+    let value = "value4".as_bytes().to_vec();
+    t.insert(&key, &value);
+    println!("t4: {:?}", t);
+
+    let key = "abc5".as_bytes().to_vec();
+    let value = "value5".as_bytes().to_vec();
+    t.insert(&key, &value);
+    println!("t5: {:?}", t);
+
     assert_eq!(1, 2);
 }
 
 #[test]
 fn test2() {
     let mut t = new_tree("key".as_bytes().to_vec());
-    let key = "abc".as_bytes().to_vec();
+    let key = "abc1".as_bytes().to_vec();
     let value = "value1".as_bytes().to_vec();
     t.insert(&key, &value);
     println!("t1: {:?}", t);

@@ -245,6 +245,7 @@ impl Node {
                 if key.get((depth + index) as usize) != prefix.get(index as usize) {
                     return index;
                 }
+                index += 1;
             }
         }
         index
@@ -325,11 +326,8 @@ impl Node {
             NODE4 => {
                 if !self.is_full() {
                     let mut index = 0;
-                    for &v in self.keys.iter() {
-                        if index >= self.size {
-                            break;
-                        }
-                        if key < v {
+                    for (ind, &v) in self.keys.iter().enumerate() {
+                        if key < self.keys[index] {
                             break;
                         }
                         index += 1;
@@ -339,7 +337,7 @@ impl Node {
                         if ind <= index as u32 {
                             break;
                         }
-                        if self.keys.get((ind - 1) as usize).unwrap().to_owned() > key {
+                        if self.keys.get((ind - 1) as usize).unwrap_or(&0u8).to_owned() > key {
                             self.keys[ind as usize] = self.keys[(ind - 1) as usize];
                             if self.children.len() == 0
                                 || self.children.get(ind as usize).is_none()
@@ -356,10 +354,14 @@ impl Node {
                         }
                         ind -= 1;
                     }
-                    self.keys[index as usize] = key;
+                    if self.keys.len() <= index {
+                        self.keys.insert(index, key);
+                    } else {
+                        self.keys[index as usize] = key;
+                    }
                     if self.children.len() == 0
                         || self.children.get(index as usize).is_none()
-                        || index >= (self.children.len() as u32)
+                        || index >= (self.children.len() as usize)
                     {
                         self.children.insert(index as usize, node.clone());
                     } else {
@@ -375,23 +377,40 @@ impl Node {
                 if !self.is_full() {
                     let mut index = 0;
                     for (ind, &v) in self.keys.iter().enumerate() {
-                        if v == 9 {
-                            index = ind;
+                        if v >= key {
                             break;
                         }
+                        index += 1;
                     }
                     let mut i = self.size;
                     loop {
                         if i <= index as u32 {
                             break;
                         }
-                        if self.keys[(i - 1) as usize] > key {
-                            self.keys[i as usize] = self.keys[(i - 1) as usize];
-                            self.children[i as usize] = self.children[(i - 1) as usize].clone();
+                        if self.keys.get((i - 1) as usize).unwrap_or(&0u8).to_owned() > key {
+                            if self.keys.len() <= i as usize {
+                                self.keys.insert(i as usize, self.keys.get((i-1) as usize).unwrap_or(&0u8).to_owned());
+                            } else {
+                                self.keys[i as usize] = self.keys[(i - 1) as usize];
+                            }
+                            if self.children.len() <= i as usize {
+                                self.children.insert(i as usize, self.children[(i - 1) as usize].clone());
+                            } else {
+                                self.children[i as usize] = self.children[(i - 1) as usize].clone();
+                            }
                         }
+                        i -= 1;
                     }
-                    self.keys[index as usize] = key;
-                    self.children[index as usize] = node.clone();
+                    if self.keys.len() <= index {
+                        self.keys.insert(index as usize, key);
+                    } else {
+                        self.keys[index as usize] = key;
+                    }
+                    if self.children.len() <= index {
+                        self.children.insert(index, node.clone());
+                    } else {
+                        self.children[index as usize] = node.clone();
+                    }
                     self.size += 1;
                 } else {
                     self.grow();
@@ -423,7 +442,7 @@ pub fn new_node(node_type: u8) -> Node {
     match node_type {
         NODE4 => {
             return Node {
-                keys: vec![0, 0, 0, 0],
+                keys: Vec::new(),
                 children: Vec::new(),
                 children_bytes: Vec::new(),
                 prefix: Vec::with_capacity(MAX_PREFIX_LEN as usize),
@@ -438,7 +457,7 @@ pub fn new_node(node_type: u8) -> Node {
         }
         NODE16 => {
             return Node {
-                keys: vec![0, 0, 0, 0],
+                keys: Vec::new(),
                 children: Vec::new(),
                 children_bytes: Vec::new(),
                 prefix: Vec::with_capacity(MAX_PREFIX_LEN as usize),
