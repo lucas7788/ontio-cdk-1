@@ -267,6 +267,23 @@ fn test3() {
     t.insert(&key, &value);
     println!("t5: {:?}", t);
 
+
+    let key = "abc6".as_bytes().to_vec();
+    let value = "value6".as_bytes().to_vec();
+    t.insert(&key, &value);
+    println!("t6: {:?}", t);
+
+
+    let key = "babc6".as_bytes().to_vec();
+    let value = "value7".as_bytes().to_vec();
+    t.insert(&key, &value);
+    println!("t7: {:?}", t);
+
+    let key = "babc7".as_bytes().to_vec();
+    if let Some(value) = t.search(&key) {
+        println!("value: {:?}", value);
+    }
+
     assert_eq!(1, 2);
 }
 
