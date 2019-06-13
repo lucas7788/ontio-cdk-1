@@ -32,8 +32,8 @@ impl Encoder for ReceiveRecord {
 
 impl Decoder for ReceiveRecord {
     fn decode(source: &mut Source) -> Result<Self, Error> {
-        let account:Address = source.read().unwrap();
-        let amount :u64= source.read().unwrap();
+        let account:Address = source.read()?;
+        let amount :u64= source.read()?;
         return Ok(ReceiveRecord{
             account,
             amount,
@@ -63,12 +63,12 @@ impl Encoder for EnvlopeStruct {
 
 impl Decoder for EnvlopeStruct{
     fn decode(source: &mut Source) -> Result<Self, Error> {
-        let token_addr = source.read().unwrap();
-        let total_amount = source.read().unwrap();
-        let total_package_count = source.read().unwrap();
-        let remain_amount = source.read().unwrap();
-        let remain_package_count = source.read().unwrap();
-        let records :Vec<ReceiveRecord>= source.read().unwrap();
+        let token_addr = source.read()?;
+        let total_amount = source.read()?;
+        let total_package_count = source.read()?;
+        let remain_amount = source.read()?;
+        let remain_package_count = source.read()?;
+        let records :Vec<ReceiveRecord>= source.read()?;
         return Ok(EnvlopeStruct{
             token_addr,
             total_amount,
