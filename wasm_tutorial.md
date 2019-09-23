@@ -221,11 +221,17 @@ runtime::notify("success".as_bytes());
 创建合约,在合约中通过该接口可以创建一个新的合约
 
 `code`:合约字节码
+
 `need_storage`:是否需要存储
+
 `name`:合约名
+
 `version`:合约版本
+
 `author`:作者
+
 `email`:邮箱信息
+
 `desc`:合约描述信息。
 
 示例
@@ -256,11 +262,17 @@ let contract_addr = runtime::contract_create(code, 1,"oep4","1.0","author","emai
 合约升级
 
 `code`:合约字节码
+
 `vm_type`:虚拟机类型
+
 `name`:合约名
+
 `version`:合约版本
+
 `author`:作者
+
 `email`:邮箱信息
+
 `desc`:合约描述信息。
 
 示例
@@ -272,6 +284,7 @@ let address =runtime::contract_migrate(code, 3, "name", "version", "author", "em
 - `call_contract(addr: &Address, input: &[u8]) -> Option<Vec<u8>>` 跨合约调用
   - `addr`目标合约地址
   - `input` 调用目标合约的参数
+  
 由于调用wasm合约和调用neovm合约参数序列化方式不一样，所以，需要区别对待，
 
 1. wasm调用wasm合约
