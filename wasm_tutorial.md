@@ -31,6 +31,7 @@ rustup default nightly
 rustup target add wasm32-unknown-unknown
 ```
 4. 安装集成开发环境
+
 IDE和编辑工具推荐Clion,IntelliJ,vim等
 
 ### 本地测试节点搭建（推荐）
@@ -49,7 +50,7 @@ https://github.com/ontio/ontology#local-privatenet
 * abi和client端代码生成
 
 #### 生成接口文档
-1. 将项目clone大本地
+1. 将项目clone到本地
 ```
 git clone https://github.com/ontio/ontology-wasm-cdt-rust.git
 ```
@@ -57,7 +58,7 @@ git clone https://github.com/ontio/ontology-wasm-cdt-rust.git
 ```
 cargo doc
 ```
-生成cdt的接口文档，可以通过浏览器查看。
+生成cdt的接口文档，生成的接口文档在当前目录下面的target文件夹下面的doc目录下,通过浏览器打开该目录下的`settings.html`文件，可以查看cdt提供的接口信息。
 
 #### abi模块介绍
 abi模块封装了合约中常用数据类型的序列化方法，方便开发者直接使用。
