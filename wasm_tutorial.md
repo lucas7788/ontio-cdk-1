@@ -217,8 +217,9 @@ runtime::notify("success".as_bytes());
 ```
 - `contract_create(
     code: &[u8], need_storage: u32, name: &str, ver: &str, author: &str, email: &str, desc: &str,
-) -> Option<Address>` 创建合约
-在合约中通过该接口可以创建一个新的合约
+) -> Option<Address>` 
+创建合约,在合约中通过该接口可以创建一个新的合约
+
 `code`:合约字节码
 `need_storage`:是否需要存储
 `name`:合约名
@@ -251,7 +252,9 @@ let contract_addr = runtime::contract_create(code, 1,"oep4","1.0","author","emai
 - `fn contract_migrate(
     code: &[u8], vm_type: u32, name: &str, version: &str, author: &str, email: &str, desc: &str,
 ) -> Option<Address>`
+
 合约升级
+
 `code`:合约字节码
 `vm_type`:虚拟机类型
 `name`:合约名
@@ -259,6 +262,7 @@ let contract_addr = runtime::contract_create(code, 1,"oep4","1.0","author","emai
 `author`:作者
 `email`:邮箱信息
 `desc`:合约描述信息。
+
 示例
 ```
 let address =runtime::contract_migrate(code, 3, "name", "version", "author", "email", "desc")
@@ -269,8 +273,11 @@ let address =runtime::contract_migrate(code, 3, "name", "version", "author", "em
   - `addr`目标合约地址
   - `input` 调用目标合约的参数
 由于调用wasm合约和调用neovm合约参数序列化方式不一样，所以，需要区别对待，
+
 1. wasm调用wasm合约
+
 wasm合约调用另外一本wasm合约时，参数序列化规则是，先序列化方法名，在序列化被调用合约方法需要的参数。
+
 示例
 ```
 let mut sink = Sink::new(16);
