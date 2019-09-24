@@ -47,11 +47,108 @@ https://github.com/ontio/ontology#local-privatenet
 
 ## 从hello world说起
 
-一个rust版本的wasm合约包含两部分组成，一部分是`Cargo.toml`配置文件，一部分是`src/lib.rs`合约逻辑文件。rust写的合约源代码要想在Ontology链上运行，需要先进行编译成wasm字节码，然后将wasm字节码部署到链上，最后在调用合约中的方法，下面会给出一个简单的例子，介绍一下整个流程。
+rust写的合约源代码要想在Ontology链上运行，需要先进行编译成wasm字节码，然后将wasm字节码部署到链上，最后在调用合约中的方法，下面会给出一个简单的例子，介绍一下整个流程。
+
+1. 新建一个helloworld合约
+```
+sss@sss rust_project $ cargo new --lib helloworld
+     Created library `helloworld` package
+```
+
+新建的合约目录结构如下
+```
+.
+├── Cargo.toml
+└── src
+    └── lib.rs
+```
+一个rust版本的wasm合约包含两部分组成，一部分是`Cargo.toml`配置文件，用于配置项目信息，一部分是`src/lib.rs`用于编写合约逻辑。
+
+2. 引入Ontology wasm合约开发工具集`ontio-std`
+在生成的`Cargo.toml`文件中引入`ontio-std`库
+```
+[package]
+name = "helloworld"
+version = "0.1.0"
+authors = ["Lucas <sishsh@163.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ontio-std = {git="https://github.com/ontio/ontology-wasm-cdt-rust.git"}
+```
+在`[dependencies]`配置项引入Ontology wasm合约工具集。
+
+3. 生成ontio-std库api文件
+虽然我们引入了开发ontology wasm合约需要的工具库，但是我们还不知道该工具库中都是有哪些接口可以用，我们可以通过下面的命令或者该库的api文档。
+```
+cargo doc
+```
+执行成功后的目录结构如下
+```
+.
+├── Cargo.lock
+├── Cargo.toml
+├── src
+│   └── lib.rs
+└── target
+    ├── debug
+    └── doc
+```
+生成的api接口文档在doc目录下。我们可以通过浏览器打开settings.html文件查看。如下图所示![Api](./images/api_doc.jpg)
+
+
+4. 编写合约逻辑
+新建的helloworld合约`lib.rs`文件内容是
+```rust
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn it_works() {
+        assert_eq!(2 + 2, 4);
+    }
+}
+```
+仅有一个测试代码,在项目根目录下，执行`cargo test` 来执行该测试代码。下面开始编写合约逻辑：
+第一步:在`lib.rs`文件中引入刚才在`Cargo.toml`配置文件中添加的`ontio-std`依赖，
+为了屏蔽`rust`标准库中的方法，我们加上`#![no_std]`注解
+```rust
+#![no_std]
+extern crate ontio_std as ostd;
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn it_works() {
+        assert_eq!(2 + 2, 4);
+    }
+}
+```
+第二步: 添加`invoke`函数,并在`invoke`函数中返回`hello world`
+```rust
+#![no_std]
+extern crate ontio_std as ostd;
+use ostd::runtime;
+#[no_mangle]
+fn invoke() {
+    runtime::ret("hello world".as_bytes());
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn it_works() {
+        assert_eq!(2 + 2, 4);
+    }
+}
+```
+把合约中的数据返回给调用合约的程序，需要使用`runtime::ret()`方法，`runtime`模块封装与链交互的接口。
+
 
 我们先来看一个完整的`hello world`合约，虽然合约逻辑简单，但是五脏俱全。
 
-`cargo.toml`配置文件如下
+`Cargo.toml`配置文件如下
 
 ```toml
 [package]
