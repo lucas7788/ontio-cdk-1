@@ -14,7 +14,7 @@ Clion是一款功能强大的C/C++/Rust开发工具，支持单步调式，方�
 
 ## 环境搭建
 
-### Rust开发环境搭建
+### Rust开发环境搭建(必须)
 
 1. 安装rustup, 非windows系统可以直接执行下面的命令。
 ```
@@ -45,7 +45,7 @@ https://github.com/ontio/ontology#local-privatenet
 
 >注意：编译好的可执行文件在启动的时候，请配置日志级别为debug模式，该模式下方便查看合约运行的debug信息。
 
-### 从hello world说起
+## 从hello world说起
 
 一个rust版本的wasm合约包含两部分组成，一部分是`Cargo.toml`配置文件，一部分是`src/lib.rs`合约逻辑文件。rust写的合约源代码要想在Ontology链上运行，需要先进行编译成wasm字节码，然后将wasm字节码部署到链上，最后在调用合约中的方法，下面会给出一个简单的例子，介绍一下整个流程。
 
