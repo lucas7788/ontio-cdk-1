@@ -204,6 +204,7 @@ RUSTFLAGS="-C link-arg=-zstack-size=32768" cargo build --release --target wasm32
 编译好的`wasm`字节码文件会比较大，部署到链上需要的存储空间会比较，费用也会比较高，但是我们可以使用`ontio-wasm-build`工具将wasm字节码减小。
 
 6. 测试合约
+
 首先，生成钱包文件，本地测试网启动需要钱包文件，执行如下的命令
 ```
 ./ontology account add
@@ -229,7 +230,7 @@ Tip:
   Using './ontology info status e6831d297472e2a2a4263f5cb83b3c61d2f36aac8fd10d613cc569c9860bf44d' to query transaction status.
 ```
 
-`--vmtype 3` 表示部署的合约类型是`wasm`合约，目前Ontology链除了支持`wasm`合约还支持`neovm`合约，部署的时候要著名合约类型。
+`--vmtype 3` 表示部署的合约类型是`wasm`合约，目前Ontology链除了支持`wasm`合约还支持`neovm`合约，部署的时候要注明合约类型。
 `--name helloworld` 表示部署合约名字是`helloworld`。
 `--author "author"` 表示部署合约作者是`author`。
 `--email "email"` 表示部署合约email是`email`。
@@ -252,9 +253,7 @@ Contract invoke successfully
 
 至此，一个简单的合约已经完成了。
 
-
-
-我们先来看一个完整的`hello world`合约，虽然合约逻辑简单，但是五脏俱全。
+下面我们再来让helloworld合约稍微复杂一点
 
 `Cargo.toml`配置文件如下
 
@@ -270,15 +269,11 @@ crate-type = ["cdylib"]
 path = "src/lib.rs"
 
 [dependencies]
-hex = "0.3.2"
-ontio-std = {path="../../ontio-std"}
+ontio-std = {git="https://github.com/ontio/ontology-wasm-cdt-rust.git"}
 
 [features]
 mock = ["ontio-std/mock"]
 ```
-* `[package]` 用于指定项目包基本信息， `name`项目名字，`version`项目版本，`authors`项目作者，`edition`库版本
-* `[lib]` 用于表示当前项目是一个库，`crate-type = ["cdylib"]` 表示将项目编译动态链接库，用于被其他语言调用，`path = "src/lib.rs"`用于指定库文件路径。
-* `[dependencies]`用于指定项目依赖库信息
 * `[features]`用于开启一些不稳定特性，只可在nightly版的编译器中使用.
 
 合约逻辑代码如下`lib.rs`
