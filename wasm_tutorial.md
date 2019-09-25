@@ -35,13 +35,21 @@ rustup default nightly
 ```
 rustup target add wasm32-unknown-unknown
 ```
-4. 安装集成开发环境
+
+4. 安装`ontio-wasm-build`工具
+
+我们使用`cargo`工具把合约编译成wasm字节码时，生成的文件会比较大，`ontio-wasm-build`可以优化字节码，从而减小合约文件大小，此外，该工具还可以校验wasm字节码中是否含有非法的字节码。
+
+具体安装方法请参考[`ontio-wasm-build`](#https://github.com/ontio/ontio-wasm-build.git)
+
+5. 安装集成开发环境
 
 IDE和编辑工具推荐Clion,IntelliJ,vim等
 
 ### 本地测试节点搭建（推荐）
+
 该部分请参考
-https://github.com/ontio/ontology#local-privatenet
+[本地测试节点环境搭建](#https://github.com/ontio/ontology#local-privatenet)
 
 >注意：编译好的可执行文件在启动的时候，请设置日志级别为debug模式，该模式下方便查看合约运行的debug信息。
 
@@ -170,7 +178,9 @@ mod tests {
 至此一个简单的返回`hello world`的函数已经完成，然后我们测试一下该合约。
 
 5. 编译合约
+
 用rust编写的合约源代码需要编译成WASM字节码，才能部署到链上，执行下满面的命令编译合约
+
 ```
 RUSTFLAGS="-C link-arg=-zstack-size=32768" cargo build --release --target wasm32-unknown-unknown
 ```
@@ -191,10 +201,7 @@ RUSTFLAGS="-C link-arg=-zstack-size=32768" cargo build --release --target wasm32
 
 编译好的合约字节码文件位于`target`目录下的`wasm32-unknown-unknown/release`目录下。
 
-编译好的`wasm`字节码文件会比较大，部署到链上需要的存储空间会比较，费用也会比较高，但是我们可以使用[`ontio-wasm-build`](#https://github.com/ontio/ontio-wasm-build.git)工具将wasm字节码减小。
-
-
-
+编译好的`wasm`字节码文件会比较大，部署到链上需要的存储空间会比较，费用也会比较高，但是我们可以使用`ontio-wasm-build`工具将wasm字节码减小。
 
 
 
