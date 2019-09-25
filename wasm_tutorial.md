@@ -315,7 +315,8 @@ use ostd::abi::{Sink, Source};
 use ostd::prelude::*;
 use ostd::runtime;
 ```
-该合约中用到的`#![no_std]`表示不使用rust标准库中功能，库`ontio_std`是在`Cargo.toml`配置文件中`[dependencies]`模块引入的，并且使用别名`ostd`,然后就可以使用`ostd`引用`ontio_std`库中的接口。
+库`ontio_std`是在`Cargo.toml`配置文件中`[dependencies]`模块引入的，并且使用别名`ostd`,然后就可以使用`ostd`引用`ontio_std`库中的接口。
+`Sink`和`Source`用于合约中数据的序列化和反序列化，`prelude`模块中封装了一些常用的方法和数据类型比如Address、U128等。`runtime`模块封装了与链交互的API。
 
 第二部分是合约中的方法，该方法仅仅是返回`hello world`字符串，代码如下。
 ```rust
@@ -361,6 +362,10 @@ fn test_hello() {
 }
 ```
 测试函数需要使用`#[test]`注解，表示该函数是一个测试函数，如果测试的函数中含有获取链上信息的方法，可以使用`mock`目录下面的`runtime`对链上接口的模拟实现api，具体的例子可以参考`examples`目录下面的`apitest`合约例子。
+执行该测试方法需要执行如下的命令
+```
+cargo test --features='mock'
+```
 
 ### 合约编译
 
@@ -384,18 +389,12 @@ RUSTFLAGS="-C link-arg=-zstack-size=32768" cargo build --release --target wasm32
 ```
 编译好的合约字节码文件位于`target`目录下的`wasm32-unknown-unknown/release`目录下。
 
-编译好的`wasm`字节码文件会比较大，部署到链上需要的存储空间会比较，费用也会比较高，但是我们可以使用`wasm-prune`、`wasm2wat`和`wat2wasm`工具将wasm字节码减小。优化命令如下
+编译好的`wasm`字节码文件会比较大，部署到链上需要的存储空间会比较，费用也会比较高，但是我们可以使用`ontio-wasm-build`工具将wasm字节码减小。优化命令如下
 ```
-cp ../target/wasm32-unknown-unknown/release/helloworld.wasm  wasm_demo.wasm
-wasm-prune -e invoke wasm_demo.wasm  wasm_demo_prune.wasm
-wasm2wat wasm_demo.wasm  -o wasm_demo.wast
-wasm2wat wasm_demo_prune.wasm  -o wasm_demo_prune.wast
-wat2wasm wasm_demo_prune.wast  -o wasm_demo_prune_no_custom.wasm
-wasm2wat wasm_demo_prune_no_custom.wasm  -o wasm_demo_prune_no_custom.wast
+ontio-wasm-build ./helloworld.wasm ./helloworld_optimized.wasm
 ```
-`wasm-prune`用于优化wasm symbols tree，只留下合约调用函数项使用的elements。
-`wasm2wat`将`.wasm`格式的字节码转换成可以阅读的文本格式`.wast`
-`wat2wasm`将可以阅读的文本格式`.wast`转换成`.wasm`格式
+
+
 
 ### Contract Deploying
 可以通过`ontology`命令行工具将合约部署到链上
