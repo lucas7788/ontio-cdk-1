@@ -40,7 +40,7 @@ rustup target add wasm32-unknown-unknown
 
 我们使用`cargo`工具把合约编译成wasm字节码时，生成的文件会比较大，`ontio-wasm-build`可以优化字节码，从而减小合约文件大小，此外，该工具还可以校验wasm字节码中是否含有非法的字节码。
 
-具体安装方法请参考[`ontio-wasm-build`](#https://github.com/ontio/ontio-wasm-build.git)
+具体安装方法请参考[ontio-wasm-build](#https://github.com/ontio/ontio-wasm-build.git)
 
 5. 安装集成开发环境
 
@@ -199,11 +199,58 @@ RUSTFLAGS="-C link-arg=-zstack-size=32768" cargo build --release --target wasm32
     └── release
 ```
 
-编译好的合约字节码文件位于`target`目录下的`wasm32-unknown-unknown/release`目录下。
+编译好的合约字节码文件位于`target`目录下的`wasm32-unknown-unknown/release`目录下文件名为`helloworld.wasm`的文件。
 
 编译好的`wasm`字节码文件会比较大，部署到链上需要的存储空间会比较，费用也会比较高，但是我们可以使用`ontio-wasm-build`工具将wasm字节码减小。
 
+6. 测试合约
+首先，生成钱包文件，本地测试网启动需要钱包文件，执行如下的命令
+```
+./ontology account add
+```
+其次，启动我们搭建好的本地测试网节点，执行下面的命令
+```shell
+./ontology --testmode --loglevel 1
+```
 
+`--testmode`表示以测试的模式启动。
+
+`--loglevel 1` 表示将日志级别设置为debug模式。
+
+然后，部署合约
+```
+sss@sss ontology (master) $ ./ontology contract deploy --vmtype 3 --code ./helloworld.wasm.str --name helloworld --author "author" --email "email" --desc "desc" --gaslimit 22200000
+Password:
+Deploy contract:
+  Contract Address:d9b7dde144cf8ee47739fc4e13dfa503afb5786c
+  TxHash:e6831d297472e2a2a4263f5cb83b3c61d2f36aac8fd10d613cc569c9860bf44d
+
+Tip:
+  Using './ontology info status e6831d297472e2a2a4263f5cb83b3c61d2f36aac8fd10d613cc569c9860bf44d' to query transaction status.
+```
+
+`--vmtype 3` 表示部署的合约类型是`wasm`合约，目前Ontology链除了支持`wasm`合约还支持`neovm`合约，部署的时候要著名合约类型。
+`--name helloworld` 表示部署合约名字是`helloworld`。
+`--author "author"` 表示部署合约作者是`author`。
+`--email "email"` 表示部署合约email是`email`。
+`--gaslimit 22200000`表示部署合约需要的费用gaslimit上限是`22200000`。
+
+>注意，需要先将wasm字节码文件转换成hex文件后，在执行上面的方法
+
+最后，调用合约中的方法,由于我们在invoke函数里直接返回了，并没有定义其他的方法，所以，调用合约的时候，不需要传参数。因为合约中没有更新链上数据的方法，仅仅只是返回`hello world`，我们在调用合约的时候，要加上预执行标签`--prepare`，否则，我们看不到合约返回的结果
+根据合约地址调用合约中的方法。该部分详细信息请参考[命令行合约调用](https://github.com/ontio/ontology/blob/master/docs/specifications/cli_user_guide_CN.md#52-%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6%E6%89%A7%E8%A1%8C)
+```
+sss@sss ontology (call_native) $ ./ontology contract invoke --address d9b7dde144cf8ee47739fc4e13dfa503afb5786c --vmtype 3 --params '' --version 0 --prepare
+Invoke:6c78b5af03a5df134efc3977e48ecf44e1ddb7d9 Params:null
+Contract invoke successfully
+  Gas limit:20000
+  Return:68656c6c6f20776f726c64 (raw value)
+```
+
+合约中我们的返回值是`hello world`，为什么执行结果却是`68656c6c6f20776f726c64`呢？这是因为合约中返回的数据，会进行hex编码，我们按照hex解码即可。
+
+
+至此，一个简单的合约已经完成了。
 
 
 
