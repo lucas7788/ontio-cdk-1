@@ -64,7 +64,7 @@ sss@sss rust_project $ cargo new --lib helloworld
 ```
 一个rust版本的wasm合约包含两部分组成，一部分是`Cargo.toml`配置文件，用于配置项目信息，一部分是`src/lib.rs`用于编写合约逻辑。
 
-2. 引入Ontology wasm合约开发工具库`ontio-std`
+2. 引入Ontology wasm合约开发工具库`ontio-std`，
 在生成的`Cargo.toml`文件中引入`ontio-std`库
 ```
 [package]
@@ -97,7 +97,8 @@ ontio-std = {git="https://github.com/ontio/ontology-wasm-cdt-rust.git"}
 在`[lib]`配置模块中，`crate-type = ["cdylib"]` 表示将项目编译动态链接库，用于被其他语言调用，`path = "src/lib.rs"`用于指定库文件路径。
 
 3. 生成ontio-std库api文件
-虽然我们引入了开发ontology wasm合约需要的工具库，但是我们还不知道该工具库中都是有哪些接口可以用，我们可以通过下面的命令或者该库的api文档。
+
+虽然我们引入了开发ontology wasm合约需要的工具库，但是我们还不知道该工具库中都是有哪些接口可以用，我们可以通过下面的命令生成该库的api文档。
 ```
 cargo doc
 ```
@@ -115,7 +116,11 @@ cargo doc
 生成的api接口文档在doc目录下。我们可以通过浏览器打开settings.html文件查看。如下图所示![Api](./images/api_doc.jpg)
 
 
+请在左侧目录栏，找到ontio_std库，点击该选项，如下图：![ontio_std](./images/ontio_std.jpg)
+
+
 4. 编写合约逻辑
+
 新建的helloworld合约`lib.rs`文件内容是
 ```rust
 #[cfg(test)]
@@ -127,7 +132,9 @@ mod tests {
 }
 ```
 仅有一个测试代码,在项目根目录下，执行`cargo test` 来执行该测试代码。下面开始编写合约逻辑：
+
 第一步:在`lib.rs`文件中引入刚才在`Cargo.toml`配置文件中添加的`ontio-std`依赖，
+
 为了屏蔽`rust`标准库中的方法，我们加上`#![no_std]`注解
 ```rust
 #![no_std]
