@@ -123,7 +123,6 @@ impl ApiTest for ApiTestInstance {
         sink.write(u128_to_neo_bytes(amount));
         sink.write_neovm_address(to);
         sink.write_neovm_address(from);
-        sink.write(83u8);
         sink.write(193u8);
         sink.write("transfer".to_string());
         sink.write(103u8);

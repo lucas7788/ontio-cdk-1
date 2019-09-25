@@ -1,5 +1,4 @@
-#![cfg_attr(not(feature = "mock"), no_std)]
-#![feature(proc_macro_hygiene)]
+#![no_std]
 extern crate ontio_std as ostd;
 use ostd::abi::{Sink, Source};
 use ostd::prelude::*;
@@ -24,5 +23,7 @@ pub fn invoke() {
 
 #[test]
 fn test_hello() {
-    say_hello();
+
+    let res = say_hello();
+    assert_eq!(res, "hello world".to_string());
 }

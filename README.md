@@ -20,6 +20,7 @@ Non-windows environment can be directly execute the following code：
 ```
 curl https://sh.rustup.rs -sSf | sh
 ```
+
 2. Install the rust compiler
 ```
 rustup install nightly
