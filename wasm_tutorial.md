@@ -59,6 +59,9 @@ IDE和编辑工具推荐Clion,IntelliJ,vim等
 rust写的合约源代码要想在Ontology链上运行，需要先进行编译成wasm字节码，然后将wasm字节码部署到链上，最后在调用合约中的方法，下面会给出一个简单的例子，介绍一下整个流程。
 
 ### 使用合约模板开发WASM合约
+
+为了开发者入手Ontology wasm合约开发，我们提供了一个合约模板(Rust)，开发者仅需clone该代码，然后添加自己的合约逻辑即可。
+
 1. 从github上面clone合约模板
 ```
 git clone https://github.com/ontio/rust-wasm-contract-template.git
@@ -81,8 +84,8 @@ rustflags = [
 	"-C", "link-args=-z stack-size=32768"
 ]
 ```
-`[target.wasm32-unknown-unknown]`表示编译目标，
-`rustflags` 配置了编译的链接参数，默认的栈大小为32768，即32kb。
+`[target.wasm32-unknown-unknown]`表示编译目标，此目标会直接使用llvm后端编译成wasm，编译的字节码可以运行在Linux、Mac和windows系统上执行。
+`rustflags` 配置了编译的链接参数，此处设置了默认的栈大小为32768，即32kb，合约在运行的过程中可以使用的栈的最大值。
 
 * `Cargo.toml`文件是合约的一些基本配置信息，其内容是
 ```
@@ -104,13 +107,19 @@ ontio-std = {git = "https://github.com/ontio/ontology-wasm-cdt-rust"}
 mock = ["ontio-std/mock"]
 ```
 
-在`[lib]`配置模块中，`crate-type = ["cdylib"]` 表示将项目编译动态链接库，用于被其他语言调用，`path = "src/lib.rs"`用于指定库文件路径。
+在`[lib]`配置模块中，
+`crate-type = ["cdylib"]` 表示将项目编译动态链接库，用于被其他语言调用。
+
+`path = "src/lib.rs"`用于指定库文件路径。
+
 `[dependencies]`用于配置项目依赖信息，这里引入了Ontology wasm合约开发需要的`ontio-std`库。
+
 `[features]`用于开启一些不稳定特性，只可在nightly版的编译器中使用.
 
 * `build.sh`文件里面封装好了编译合约和优化合约的功能，待合约开发完成后，执行该脚本会将优化后的合约字节码放到`output`目录下面。
 
 * `src/lib.rs`用于编写合约逻辑代码，合约模板里面的代码如下
+
 ```
 #![no_std]
 use ontio_std::runtime;
@@ -146,6 +155,10 @@ sudo chmod +x ./build.sh
 │   ├── rust_wasm_contract_template.wasm
 │   └── rust_wasm_contract_template.wasm.str
 ```
+
+`rust_wasm_contract_template.wasm`是我们编译合约源代码生成的wasm字节码文件。
+`rust_wasm_contract_template.wasm.str`是wasm字节码的hex编码格式的文件。
+
 
 3. 部署合约
 
