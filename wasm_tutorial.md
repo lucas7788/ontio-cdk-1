@@ -307,14 +307,32 @@ mod tests {
     }
 }
 ```
-第二步: 添加`invoke`函数,并在`invoke`函数中返回`hello world`
+第二步: 添加`invoke`函数,在这个合约中，我们实现一个方法获得调用的参数并将参数返回出去，代码如下：
 ```rust
 #![no_std]
 extern crate ontio_std as ostd;
+use ostd::abi::{Sink, Source};
+use ostd::prelude::*;
 use ostd::runtime;
+
+fn say_hello(msg: &str) -> String {
+    return msg.to_string();
+}
+
 #[no_mangle]
 fn invoke() {
-    runtime::ret("hello world".as_bytes());
+    let input = runtime::input();
+    let mut source = Source::new(&input);
+    let action: &[u8] = source.read().unwrap();
+    let mut sink = Sink::new(12);
+    match action {
+        b"hello" => {
+        let msg = source.read().unwrap();
+        sink.write(say_hello(msg));
+        },
+        _ => panic!("unsupported action!"),
+    }
+    runtime::ret(sink.bytes())
 }
 
 #[cfg(test)]
@@ -325,8 +343,10 @@ mod tests {
     }
 }
 ```
+在合约中，我们引入了`ontio-std`库里面`abi`模块的`Sink`和`Source`数据类型，`Source`用于读取外部调用合约中的方法时传进来的方法名和方法参数信息，`Sink`用于合约中不同类型的数据序列化成bytearray。
+`ontio-std`库里面的`prelude`模块提供了一些常用的数据类型，比如`Address`、`U128`、`String`等。
 把合约执行的结果返回给调用合约的程序，需要使用`runtime::ret()`方法，`runtime`模块封装与链交互的接口。
-至此一个简单的返回`hello world`的函数已经完成，然后我们测试一下该合约。
+至此一个简单的返回传入参数的合约已经完成，然后我们测试一下该合约。
 
 5. 编译合约
 
@@ -353,6 +373,7 @@ RUSTFLAGS="-C link-arg=-zstack-size=32768" cargo build --release --target wasm32
 编译好的合约字节码文件位于`target`目录下的`wasm32-unknown-unknown/release`目录下文件名为`helloworld.wasm`的文件。
 
 编译好的`wasm`字节码文件会比较大，部署到链上需要的存储空间会比较，费用也会比较高，但是我们可以使用`ontio-wasm-build`工具将wasm字节码减小。
+`ontio-wasm-build`的使用方法请[参考]()
 
 6. 测试合约
 
