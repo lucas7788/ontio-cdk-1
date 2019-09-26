@@ -4,8 +4,8 @@ use ostd::abi::{Sink, Source};
 use ostd::prelude::*;
 use ostd::runtime;
 
-fn say_hello() -> String {
-    return "hello world".to_string();
+fn say_hello(msg: &str) -> String {
+    return msg.to_string();
 }
 
 #[no_mangle]
@@ -15,7 +15,10 @@ pub fn invoke() {
     let action: &[u8] = source.read().unwrap();
     let mut sink = Sink::new(12);
     match action {
-        b"hello" => sink.write(say_hello()),
+        b"hello" => {
+            let msg = source.read().unwrap();
+            sink.write(say_hello(msg));
+        },
         _ => panic!("unsupported action!"),
     }
     runtime::ret(sink.bytes())
