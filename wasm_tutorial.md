@@ -257,8 +257,9 @@ ontio-std = {git="https://github.com/ontio/ontology-wasm-cdt-rust.git"}
 mock = ["ontio-std/mock"]
 
 ```
-在`[lib]`配置模块中，`crate-type = ["cdylib"]` 表示将项目编译动态链接库，用于被其他语言调用，`path = "src/lib.rs"`用于指定库文件路径。
-
+在`[lib]`配置模块中，
+* `crate-type = ["cdylib"]` 表示将项目编译动态链接库，用于被其他语言调用，
+*`path = "src/lib.rs"`用于指定库文件路径。
 * `[features]`用于开启一些不稳定特性，只可在nightly版的编译器中使用.
 
 3. 生成ontio-std库api文件
