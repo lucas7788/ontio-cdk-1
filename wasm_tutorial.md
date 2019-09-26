@@ -49,7 +49,8 @@ IDE和编辑工具推荐Clion,IntelliJ,vim等
 ### 本地测试节点搭建（推荐）
 
 该部分请参考
-[本地测试节点环境搭建](#https://github.com/ontio/ontology#local-privatenet)
+
+[本地测试节点环境搭建](https://github.com/ontio/ontology#local-privatenet)
 
 >注意：编译好的可执行文件在启动的时候，请设置日志级别为debug模式，该模式下方便查看合约运行的debug信息。
 
