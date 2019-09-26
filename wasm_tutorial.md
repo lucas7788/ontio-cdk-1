@@ -252,8 +252,14 @@ crate-type = ["cdylib"]
 path = "src/lib.rs"
 [dependencies]
 ontio-std = {git="https://github.com/ontio/ontology-wasm-cdt-rust.git"}
+
+[features]
+mock = ["ontio-std/mock"]
+
 ```
 在`[lib]`配置模块中，`crate-type = ["cdylib"]` 表示将项目编译动态链接库，用于被其他语言调用，`path = "src/lib.rs"`用于指定库文件路径。
+
+* `[features]`用于开启一些不稳定特性，只可在nightly版的编译器中使用.
 
 3. 生成ontio-std库api文件
 
@@ -335,13 +341,13 @@ fn invoke() {
     runtime::ret(sink.bytes())
 }
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
+#[test]
+fn test_hello() {
+
+    let res = say_hello("hello world");
+    assert_eq!(res, "hello world".to_string());
 }
+
 ```
 在合约中，我们引入了`ontio-std`库里面`abi`模块的`Sink`和`Source`数据类型，`Source`用于读取外部调用合约中的方法时传进来的方法名和方法参数信息，`Sink`用于合约中不同类型的数据序列化成bytearray。
 `ontio-std`库里面的`prelude`模块提供了一些常用的数据类型，比如`Address`、`U128`、`String`等。
@@ -373,7 +379,7 @@ RUSTFLAGS="-C link-arg=-zstack-size=32768" cargo build --release --target wasm32
 编译好的合约字节码文件位于`target`目录下的`wasm32-unknown-unknown/release`目录下文件名为`helloworld.wasm`的文件。
 
 编译好的`wasm`字节码文件会比较大，部署到链上需要的存储空间会比较，费用也会比较高，但是我们可以使用`ontio-wasm-build`工具将wasm字节码减小。
-`ontio-wasm-build`的使用方法请[参考]()
+`ontio-wasm-build`的使用方法请[参考](https://github.com/ontio/ontio-wasm-build.git)
 
 6. 测试合约
 
@@ -395,11 +401,11 @@ RUSTFLAGS="-C link-arg=-zstack-size=32768" cargo build --release --target wasm32
 sss@sss ontology (master) $ ./ontology contract deploy --vmtype 3 --code ./helloworld.wasm.str --name helloworld --author "author" --email "email" --desc "desc" --gaslimit 22200000
 Password:
 Deploy contract:
-  Contract Address:d9b7dde144cf8ee47739fc4e13dfa503afb5786c
-  TxHash:e6831d297472e2a2a4263f5cb83b3c61d2f36aac8fd10d613cc569c9860bf44d
+  Contract Address:913ea5298565123847ffe61ec93986a52e824a1b
+  TxHash:8386410c2ccdc5127e5bd893072a152afaa5dcf20c9b736583f803cba4f461e6
 
 Tip:
-  Using './ontology info status e6831d297472e2a2a4263f5cb83b3c61d2f36aac8fd10d613cc569c9860bf44d' to query transaction status.
+  Using './ontology info status 8386410c2ccdc5127e5bd893072a152afaa5dcf20c9b736583f803cba4f461e6' to query transaction status.
 ```
 
 `--vmtype 3` 表示部署的合约类型是`wasm`合约，目前Ontology链除了支持`wasm`合约还支持`neovm`合约，部署的时候要注明合约类型。
@@ -413,11 +419,11 @@ Tip:
 最后，调用合约中的方法,由于我们在invoke函数里直接返回了，并没有定义其他的方法，所以，调用合约的时候，不需要传参数。因为合约中没有更新链上数据的方法，仅仅只是返回`hello world`，我们在调用合约的时候，要加上预执行标签`--prepare`，否则，我们看不到合约返回的结果
 根据合约地址调用合约中的方法。该部分详细信息请参考[命令行合约调用](https://github.com/ontio/ontology/blob/master/docs/specifications/cli_user_guide_CN.md#52-%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6%E6%89%A7%E8%A1%8C)
 ```
-sss@sss ontology (master) $ ./ontology contract invoke --address d9b7dde144cf8ee47739fc4e13dfa503afb5786c --vmtype 3 --params '' --version 0 --prepare
-Invoke:6c78b5af03a5df134efc3977e48ecf44e1ddb7d9 Params:null
+sss@sss ontology (master) $ ./ontology contract invoke --address 913ea5298565123847ffe61ec93986a52e824a1b --vmtype 3 --params 'string:hello,string:hello world' --version 0 --prepare
+Invoke:1b4a822ea58639c91ee6ff473812658529a53e91 Params:["hello","hello world"]
 Contract invoke successfully
   Gas limit:20000
-  Return:68656c6c6f20776f726c64 (raw value)
+  Return:0b68656c6c6f20776f726c64 (raw value)
 ```
 
 合约中我们的返回值是`hello world`，为什么执行结果却是`68656c6c6f20776f726c64`呢？这是因为合约中返回的数据，会进行hex编码，我们按照hex解码即可。
@@ -425,169 +431,6 @@ Contract invoke successfully
 
 至此，一个简单的合约已经完成了。
 
-
-下面我们再来让helloworld合约稍微复杂一点
-
-`Cargo.toml`配置文件如下
-
-```toml
-[package]
-name = "helloworld"
-version = "0.1.0"
-authors = ["lucas7788 <sishsh@163.com>"]
-edition = "2018"
-
-[lib]
-crate-type = ["cdylib"]
-path = "src/lib.rs"
-
-[dependencies]
-ontio-std = {git="https://github.com/ontio/ontology-wasm-cdt-rust.git"}
-
-[features]
-mock = ["ontio-std/mock"]
-```
-* `[features]`用于开启一些不稳定特性，只可在nightly版的编译器中使用.
-
-合约逻辑代码如下`lib.rs`
-```rust
-#![no_std]
-extern crate ontio_std as ostd;
-use ostd::abi::{Sink, Source};
-use ostd::prelude::*;
-use ostd::runtime;
-
-fn say_hello() -> String {
-    return "hello world".to_string();
-}
-
-#[no_mangle]
-pub fn invoke() {
-    let input = runtime::input();
-    let mut source = Source::new(&input);
-    let action: &[u8] = source.read().unwrap();
-    let mut sink = Sink::new(12);
-    match action {
-        b"hello" => sink.write(say_hello()),
-        _ => panic!("unsupported action!"),
-    }
-    runtime::ret(sink.bytes())
-}
-
-#[test]
-fn test_hello() {
-    let res = say_hello();
-    assert_eq!(res, "hello world".to_string());
-}
-```
-该合约有四部分组成，第一部分是库引入模块，代码如下
-```rust
-#![no_std]
-extern crate ontio_std as ostd;
-use ostd::abi::{Sink, Source};
-use ostd::prelude::*;
-use ostd::runtime;
-```
-库`ontio_std`是在`Cargo.toml`配置文件中`[dependencies]`模块引入的，并且使用别名`ostd`,然后就可以使用`ostd`引用`ontio_std`库中的接口。
-`Sink`和`Source`用于合约中数据的序列化和反序列化，`prelude`模块中封装了一些常用的方法和数据类型比如Address、U128等。`runtime`模块封装了与链交互的API。
-
-第二部分是合约中的方法，该方法仅仅是返回`hello world`字符串，代码如下。
-```rust
-fn say_hello() -> String {
-    return "hello world".to_string();
-}
-```
-
-
-第三部分是合约入口函数`invoke`,这是Ontology wasm合约的一个约定，在Ontology 虚拟机执行wasm合约的时候会首先去读取`invoke`函数，从`invoke`函数开始执行合约逻辑, 此外，`invoke`函数被`#[no_mangle]`修饰，表示在对合约源代码进行编译成字节码的时候，rust编译器不会为它进行函数名混淆。
-```rust
-#[no_mangle]
-pub fn invoke() {
-    let input = runtime::input();
-    let mut source = Source::new(&input);
-    let action: &[u8] = source.read().unwrap();
-    let mut sink = Sink::new(12);
-    match action {
-        b"hello" => sink.write(say_hello()),
-        _ => panic!("unsupported action!"),
-    }
-    runtime::ret(sink.bytes())
-}
-```
-该合约的基本逻辑是，
-第一步，从`runtime::input()`获得调用合约的方法名和参数内容，`runtime`模块是`ontology-wasm-cdt-rust`工具集封装好的与链交互的api，`input`方法可以获得链在调用合约时传进来的方法名和参数信息。
-第二步，`let mut source = Source::new(&input);`构造反序列化对象，读出调用的方法名以及方法参数信息。
-第三步，根据读到的方法名匹配到相应的方法处执行，
-```rust
-match action {
-    b"hello" => sink.write(say_hello()),
-    _ => panic!("unsupported action!"),
-}
-```
-第四步，将合约执行结果使用`sink`进行序列化,调用`runtime::ret()`将序列化好的合约执行结果返回。
-
-第四部分是合约中的方法测试部分，代码如下
-```rust
-#[test]
-fn test_hello() {
-    let res = say_hello();
-    assert_eq!(res, "hello world".to_string());
-}
-```
-测试函数需要使用`#[test]`注解，表示该函数是一个测试函数，如果测试的函数中含有获取链上信息的方法，可以使用`mock`目录下面的`runtime`对链上接口的模拟实现api，具体的例子可以参考`examples`目录下面的`apitest`合约例子。
-执行该测试方法需要执行如下的命令
-```
-cargo test --features='mock'
-```
-
-### 合约编译
-
-为了使得合约部署到链上执行，我们需要将合约编译成wasm字节码，合约编译我们可以直接使用`cargo`工具进行编译，先进入合约根目录，然后执行如下的命令
-```
-RUSTFLAGS="-C link-arg=-zstack-size=32768" cargo build --release --target wasm32-unknown-unknown
-```
-`RUSTFLAGS="-C link-arg=-zstack-size=32768"`表示设置rustc编译时使用的栈大小为32kb，rustc编译默认设置的栈内存大小是1M，对合约来说是巨大的浪费，因此在编译时设置下栈的大小，32kb对于绝大多数合约来说是够用的。
-`wasm32-unknown-unknown` 表示在编译成目标字节码时，使用`llvm`后端编译工具，它适合纯rust代码编译，跟emscripten目标比起来，它默认就生成更加洗练的代码。
-
-该代码执行后，会生成`target`文件夹，目录结构如下
-```
-.
-├── release
-│   ├── build
-│   ├── deps
-│   ├── examples
-│   └── incremental
-└── wasm32-unknown-unknown
-    └── release
-```
-编译好的合约字节码文件位于`target`目录下的`wasm32-unknown-unknown/release`目录下。
-
-编译好的`wasm`字节码文件会比较大，部署到链上需要的存储空间会比较，费用也会比较高，但是我们可以使用`ontio-wasm-build`工具将wasm字节码减小。优化命令如下
-```
-ontio-wasm-build ./helloworld.wasm ./helloworld_optimized.wasm
-```
-
-
-
-### Contract Deploying
-可以通过`ontology`命令行工具将合约部署到链上
-```
-./ontology contract deploy --vmtype 3 --code ./helloworld.wasm.str --name helloworld --author "author" --email "email" --desc "desc" --gaslimit 22200000
-```
-`--vmtype 3` 表示部署的合约类型是`wasm`合约，目前Ontology链除了支持`wasm`合约还支持`neovm`合约，部署的时候要著名合约类型。
-`--name helloworld` 表示部署合约名字是`helloworld`。
-`--author "author"` 表示部署合约作者是`author`。
-`--email "email"` 表示部署合约email是`email`。
-`--gaslimit 22200000`表示部署合约需要的费用gaslimit上限是`22200000`。
-
->注意，需要先将wasm字节码文件转换成hex文件后，在执行上面的方法
-
-### Contract Testing
-调用合约中的方法
-```
-./ontology contract invoke --address 51113dbe9e984939c0435eacfcf4c78d50525090 --vmtype 3 --params 'string:hello' --version 0 --return string
-```
-根据合约地址调用合约中的方法。该部分详细信息请参考[命令行合约调用](https://github.com/ontio/ontology/blob/master/docs/specifications/cli_user_guide_CN.md#52-%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6%E6%89%A7%E8%A1%8C)
 
 ## ontology-wasm-cdt-rust介绍
 `ontio-cdk`是用于使用rust开发面向ontology的WebAssembly智能合约工具套件, 包含合约编写的标准库，链上交互的运行时api，合约接口abi生成插件，合约测试框架等。
