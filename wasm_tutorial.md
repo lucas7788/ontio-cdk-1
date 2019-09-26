@@ -31,14 +31,14 @@ rustup install nightly
 ```
 rustup default nightly
 ```
-3. 安装wasm32编译目前
+3. 安装wasm32编译目标
 ```
 rustup target add wasm32-unknown-unknown
 ```
 
 4. 安装`ontio-wasm-build`工具
 
-我们使用`cargo`工具把合约编译成wasm字节码时，生成的文件会比较大，`ontio-wasm-build`可以优化字节码，从而减小合约文件大小，此外，该工具还可以校验wasm字节码中是否含有非法的字节码。
+我们使用`cargo`工具把合约编译成wasm字节码时，生成的文件会比较大，`ontio-wasm-build`可以优化字节码，从而减小合约文件大小，将合约部署到链上之前，必须通过该工具进行合约的优化与检查。
 
 具体安装方法请参考[ontio-wasm-build](https://github.com/ontio/ontio-wasm-build.git)
 
