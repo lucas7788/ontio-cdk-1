@@ -82,7 +82,7 @@ rustflags = [
 ]
 ```
 `[target.wasm32-unknown-unknown]`表示编译目标，
-`rustflags` 配置了编译的链接参数，已经默认的栈大小为32768，即32kb。
+`rustflags` 配置了编译的链接参数，默认的栈大小为32768，即32kb。
 
 * `Cargo.toml`文件是合约的一些基本配置信息，其内容是
 ```
@@ -107,10 +107,92 @@ mock = ["ontio-std/mock"]
 在`[lib]`配置模块中，`crate-type = ["cdylib"]` 表示将项目编译动态链接库，用于被其他语言调用，`path = "src/lib.rs"`用于指定库文件路径。
 `[dependencies]`用于配置项目依赖信息，这里引入了Ontology wasm合约开发需要的`ontio-std`库。
 `[features]`用于开启一些不稳定特性，只可在nightly版的编译器中使用.
-* `build.sh`文件里面封装好了编译合约和优化合约的功能，待合约开发完成后，执行该脚本会生成`output`目录下面。
+
+* `build.sh`文件里面封装好了编译合约和优化合约的功能，待合约开发完成后，执行该脚本会将优化后的合约字节码放到`output`目录下面。
+
+* `src/lib.rs`用于编写合约逻辑代码，合约模板里面的代码如下
+```
+#![no_std]
+use ontio_std::runtime;
+
+#[no_mangle]
+fn invoke() {
+	runtime::ret(b"hello");
+}
+```
+
+`#![no_std]` 表示屏蔽标准库中的接口。
+`#[no_mangle]`表示在编译成wasm字节码时候，不对`invoke`函数名进行混淆。
+`runtime`模块封装了合约与链交互的接口，`runtime::ret()`用于将合约执行的结果返回给调用方。
+该合约实现了一个简单的返回hello功能。
+
+2. 编译合约
+
+直接执行`build.sh`脚本即可实现合约编译和合约字节码优化。
+```
+./build.sh
+```
+如果在执行的过程中出现如下错误
+```
+-bash: ./build.sh: Permission denied
+```
+请先给该文件可执行权限
+```
+sudo chmod +x ./build.sh
+```
+执行成功后，会在当前目录下生成`output`目录,output的目录结构如下
+```
+├── output
+│   ├── rust_wasm_contract_template.wasm
+│   └── rust_wasm_contract_template.wasm.str
+```
+
+3. 部署合约
+
+编译好的wasm合约需要部署到链上，才能运行。我们可以将上面的合约字节码文件部署到测试网，或者本地测试节点，下面以部署到本地测试网为例：
+
+首先，启动本地测试节点，在启动之前，我们需要先生成钱包文件
+```
+./ontology account add
+```
+上面命令在执行的过程中用默认配置即可，再执行下面的命令启动本地测试节点
+```
+./ontology --testmode --loglevel 1
+```
+`--loglevel 1` 表示节点的日志级别是`debug`，测试合约中如果有debug信息，会在节点日志中显示出来。
+
+其次，在另外一个终端窗口部署合约，
+
+```
+sss@sss ontology (master) $ ./ontology contract deploy --vmtype 3 --code ./rust_wasm_contract_template.wasm.str --name helloworld --author "author" --email "email" --desc "desc" --gaslimit 22200000
+Password:
+Deploy contract:
+  Contract Address:0be3df2e320f86f55709806425dc1f0b91966634
+  TxHash:bd83f796bfd79bbb2546978ebd02d5ff3a54c2a4a6550d484689f627513f5770
+
+Tip:
+  Using './ontology info status bd83f796bfd79bbb2546978ebd02d5ff3a54c2a4a6550d484689f627513f5770' to query transaction status.
+```
+
+如果出现gaslimit不够的错误信息，请设置更大的gaslimit参数
+
+4. 测试合约
+
+现在我们来调用合约中的方法，执行如下的命令
+```
+sss@sss ontology (master) $ ./ontology contract invoke --address 0be3df2e320f86f55709806425dc1f0b91966634 --vmtype 3 --params '' --version 0 --prepare
+Invoke:346696910b1fdc2564800957f5860f322edfe30b Params:null
+Contract invoke successfully
+  Gas limit:20000
+  Return:68656c6c6f (raw value)
+```
+为了能够看到合约执行返回的结果，我们在命令后面加了`--prepare`标签，表示该交易是预执行交易。
+合约中我们返回的是"hello"，为什么在命令行我们得到的是`68656c6c6f`，其实这是`hello`的hex编码格式而已，我们仅需用hex解码即可。
 
 
 ### 自己动手从零开始
+
+合约模板使用起来虽然简单，但是遮住了我们探寻真相的双眼，下面我们就自己动手从0开始开发Ontology wasm合约。
 
 1. 新建一个helloworld合约
 
@@ -297,7 +379,7 @@ Tip:
 最后，调用合约中的方法,由于我们在invoke函数里直接返回了，并没有定义其他的方法，所以，调用合约的时候，不需要传参数。因为合约中没有更新链上数据的方法，仅仅只是返回`hello world`，我们在调用合约的时候，要加上预执行标签`--prepare`，否则，我们看不到合约返回的结果
 根据合约地址调用合约中的方法。该部分详细信息请参考[命令行合约调用](https://github.com/ontio/ontology/blob/master/docs/specifications/cli_user_guide_CN.md#52-%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6%E6%89%A7%E8%A1%8C)
 ```
-sss@sss ontology (call_native) $ ./ontology contract invoke --address d9b7dde144cf8ee47739fc4e13dfa503afb5786c --vmtype 3 --params '' --version 0 --prepare
+sss@sss ontology (master) $ ./ontology contract invoke --address d9b7dde144cf8ee47739fc4e13dfa503afb5786c --vmtype 3 --params '' --version 0 --prepare
 Invoke:6c78b5af03a5df134efc3977e48ecf44e1ddb7d9 Params:null
 Contract invoke successfully
   Gas limit:20000
