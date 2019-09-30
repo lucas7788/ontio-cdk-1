@@ -8,6 +8,10 @@ fn say_hello(msg: &str) -> String {
     return msg.to_string();
 }
 
+fn get_u128(msg: U128) -> U128 {
+    return msg;
+}
+
 #[no_mangle]
 pub fn invoke() {
     let input = runtime::input();
@@ -19,6 +23,10 @@ pub fn invoke() {
             let msg = source.read().unwrap();
             sink.write(say_hello(msg));
         },
+        b"getnum" => {
+            let msg = source.read().unwrap();
+            sink.write(get_u128(msg));
+        },
         _ => panic!("unsupported action!"),
     }
     runtime::ret(sink.bytes())
@@ -27,6 +35,6 @@ pub fn invoke() {
 #[test]
 fn test_hello() {
 
-    let res = say_hello();
+    let res = say_hello("");
     assert_eq!(res, "hello world".to_string());
 }
