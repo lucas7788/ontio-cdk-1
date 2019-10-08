@@ -415,7 +415,7 @@ Tip:
 
 >注意，需要先将wasm字节码文件转换成hex文件后，在执行上面的方法
 
-最后，调用合约中的方法,由于我们在invoke函数里直接返回了，并没有定义其他的方法，所以，调用合约的时候，不需要传参数。因为合约中没有更新链上数据的方法，仅仅只是返回`hello world`，我们在调用合约的时候，要加上预执行标签`--prepare`，否则，我们看不到合约返回的结果
+最后，调用合约中的方法,由于我们在invoke函数里仅定义了`hello`方法，并且该方法将输入的参数内容直接返回，所以，调用合约的时候，第一个参数是方法名，第二个参数是合约中的该方法需要的参数。因为合约中没有更新链上数据的方法，仅仅只是返回`hello world`，我们在调用合约的时候，要加上预执行标签`--prepare`，否则，我们看不到合约返回的结果
 根据合约地址调用合约中的方法。该部分详细信息请参考[命令行合约调用](https://github.com/ontio/ontology/blob/master/docs/specifications/cli_user_guide_CN.md#52-%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6%E6%89%A7%E8%A1%8C)
 ```
 sss@sss ontology (master) $ ./ontology contract invoke --address 913ea5298565123847ffe61ec93986a52e824a1b --vmtype 3 --params 'string:hello,string:hello world' --version 0 --prepare
