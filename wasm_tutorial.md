@@ -521,8 +521,11 @@ let (from, to, amount) = source.read().unwrap();
    - `pub fn call_contract<T: crate::abi::VmValueEncoder>(
               contract_address: &Address, param: T,
           ) -> Option<Vec<u8>>`
+          
       `contract_address` 调用的neo合约地址，
+      
       `param` neo合约方法名和参数tuple,
+      
       示例：被调用合约方法不需要参数的情况，调用如下
       ```
       let res = neo::call_contract(&Neo_Contract_Addr, ("init", ()));
