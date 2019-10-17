@@ -380,10 +380,18 @@ RUSTFLAGS="-C link-arg=-zstack-size=32768" cargo build --release --target wasm32
 
 编译好的合约字节码文件位于`target`目录下的`wasm32-unknown-unknown/release`目录下文件名为`helloworld.wasm`的文件。
 
+6. 优化合约字节码
 编译好的`wasm`字节码文件会比较大，部署到链上需要的存储空间会比较，费用也会比较高，但是我们可以使用`ontio-wasm-build`工具将wasm字节码减小。
-`ontio-wasm-build`的使用方法请[参考](https://github.com/ontio/ontio-wasm-build.git)
 
-6. 测试合约
+执行下面的命令优化该合约字节码
+```
+ontio-wasm-build ./target/wasm32-unknown-unknown/release/hellloworld.wasm
+```
+该命令执行完后，会在`./target/wasm32-unknown-unknown/release/`生成的文件如下
+`helloworld_optimized.wasm` 优化后的wasm合约字节码
+`helloworld_optimized.wasm.str` 优化后的wasm合约字节码的hex编码格式。
+
+7. 测试合约
 
 首先，生成钱包文件，本地测试网启动需要钱包文件，执行如下的命令
 ```
