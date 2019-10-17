@@ -40,7 +40,8 @@ rustup target add wasm32-unknown-unknown
 
 我们使用`cargo`工具把合约编译成wasm字节码时，生成的文件会比较大，`ontio-wasm-build`可以优化字节码，从而减小合约文件大小，将合约部署到链上之前，必须通过该工具进行合约的优化与检查。
 
-具体安装方法请参考[ontio-wasm-build](https://github.com/ontio/ontio-wasm-build.git)
+执行如下的安装命令
+该工具的使用介绍请参考[ontio-wasm-build](https://github.com/ontio/ontio-wasm-build.git)
 
 5. 安装集成开发环境
 
@@ -84,7 +85,7 @@ rustflags = [
 	"-C", "link-args=-z stack-size=32768"
 ]
 ```
-`[target.wasm32-unknown-unknown]`表示编译目标，此目标会直接使用llvm后端编译成wasm，编译的字节码可以运行在Linux、Mac和windows系统上执行。
+`[target.wasm32-unknown-unknown]`表示编译目标。
 `rustflags` 配置了编译的链接参数，此处设置了默认的栈大小为32768，即32kb，合约在运行的过程中可以使用的栈的最大值。
 
 * `Cargo.toml`文件是合约的一些基本配置信息，其内容是
