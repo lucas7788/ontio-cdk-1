@@ -284,6 +284,7 @@ cargo doc
 
 请在左侧目录栏，找到ontio_std库，点击该选项，如下图：![ontio_std](./images/ontio_std.jpg)
 
+上面列出了`ontio_std`库中封装好的所有模块，在开发合约的过程中，可以中使用这些模块中的功能。
 
 4. 编写合约逻辑
 
