@@ -315,7 +315,7 @@ mod tests {
     }
 }
 ```
-第二步: 添加`invoke`函数,在这个合约中，我们实现一个方法获得调用的参数并将参数返回出去，代码如下：
+第二步: 添加`invoke`函数,该函数是Ontology wasm默认的入口函数，在这个合约中，我们实现一个方法获得调用的参数并将参数返回出去，代码如下：
 ```rust
 #![no_std]
 extern crate ontio_std as ostd;
@@ -364,7 +364,7 @@ fn test_hello() {
 RUSTFLAGS="-C link-arg=-zstack-size=32768" cargo build --release --target wasm32-unknown-unknown
 ```
 在上面的命令中，`RUSTFLAGS="-C link-arg=-zstack-size=32768"`表示设置rustc编译时使用的栈大小为32kb，rustc编译默认设置的栈内存大小是1M，对合约来说是巨大的浪费，因此在编译时设置下栈的大小，32kb对于绝大多数合约来说是够用的。
-`wasm32-unknown-unknown` 表示在编译成目标字节码时，使用`llvm`后端编译工具，它适合纯rust代码编译，跟emscripten目标比起来，它默认就生成更加洗练的代码。
+`wasm32-unknown-unknown` 表示在编译目标。
 
 该代码执行后，会生成`target`文件夹，目录结构如下
 ```
