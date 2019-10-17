@@ -224,7 +224,8 @@ sss@sss rust_project $ cargo new --lib helloworld
 ```
 一个rust版本的wasm合约包含两部分组成，一部分是`Cargo.toml`配置文件，用于配置项目信息，一部分是`src/lib.rs`用于编写合约逻辑。
 
-2. 引入Ontology wasm合约开发工具库`ontio-std`，
+2. 引入Ontology wasm合约开发工具库`ontio-std`
+
 在生成的`Cargo.toml`文件中引入`ontio-std`库
 ```
 [package]
