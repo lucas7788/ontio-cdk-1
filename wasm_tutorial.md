@@ -388,7 +388,9 @@ RUSTFLAGS="-C link-arg=-zstack-size=32768" cargo build --release --target wasm32
 ontio-wasm-build ./target/wasm32-unknown-unknown/release/hellloworld.wasm
 ```
 该命令执行完后，会在`./target/wasm32-unknown-unknown/release/`生成的文件如下
+
 `helloworld_optimized.wasm` 优化后的wasm合约字节码
+
 `helloworld_optimized.wasm.str` 优化后的wasm合约字节码的hex编码格式。
 
 7. 测试合约
