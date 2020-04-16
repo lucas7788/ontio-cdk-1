@@ -108,16 +108,22 @@ fn crowd_sourcing_complete(
         assert!(contract::ong::transfer(&self_address, &ADMIN, fee));
         let balance = (cf.count - collected_count) * cf.price - fee;
         assert!(contract::ong::transfer(&self_address, &cf.user, balance));
-        EventBuilder::new().string("collection_complete").h256(data_set_hash).notify();
+        EventBuilder::new()
+            .string("collection_complete")
+            .h256(id)
+            .h256(data_set_hash)
+            .number(collected_count)
+            .notify();
     }
     false
 }
 
 fn pay_to_providers(id: &H256, providers: Vec<&Address>) -> bool {
     assert!(runtime::check_witness(&ADMIN));
+    let self_address = runtime::address();
     if let Some(cf) = database::get::<_, CrowdSourcing>(id) {
         for provider in providers {
-            assert!(contract::ong::transfer(&ADMIN, provider, cf.price));
+            assert!(contract::ong::transfer(&self_address, provider, cf.price));
         }
     }
     false
@@ -125,10 +131,11 @@ fn pay_to_providers(id: &H256, providers: Vec<&Address>) -> bool {
 
 fn crowd_sourcing_abort(id: &H256) -> bool {
     assert!(check_witness(&ADMIN));
+    let self_address = runtime::address();
     if let Some(cf) = database::get::<_, CrowdSourcing>(id) {
         let amt = cf.price * cf.count + cf.price * cf.count * cf.platform_fee_rate;
-        assert!(contract::ong::transfer(&ADMIN, &cf.user, amt));
-        EventBuilder::new().string("collection_abort").number(amt).notify();
+        assert!(contract::ong::transfer(&self_address, &cf.user, amt));
+        EventBuilder::new().string("collection_abort").address(&cf.user).number(amt).notify();
         return true;
     }
     false
