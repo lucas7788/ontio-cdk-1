@@ -119,7 +119,7 @@ impl EventBuilder {
     ///   let hash = runtime::sha256("test");
     ///   EventBuilder::new().h256(hash).notify();
     ///```
-    pub fn h256(mut self, hash: H256) -> Self {
+    pub fn h256(mut self, hash: &H256) -> Self {
         self.sink.write_byte(TYPE_H256);
         self.sink.write_bytes(hash.as_ref());
         self.num_entry += 1;
