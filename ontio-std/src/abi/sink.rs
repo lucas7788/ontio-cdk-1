@@ -137,3 +137,15 @@ impl Sink {
         self.buf
     }
 }
+
+#[test]
+fn sink_write() {
+    use crate::abi::source::Source;
+    let mut sink = Sink::new(16);
+    let addr = Address::repeat_byte(1);
+    sink.write_native_address(&addr);
+
+    let mut source = Source::new(sink.bytes());
+    let addr2 = source.read_native_address().ok().unwrap();
+    assert_eq!(&addr, addr2);
+}

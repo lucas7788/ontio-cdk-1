@@ -323,3 +323,39 @@ pub(crate) mod util {
         0
     }
 }
+
+pub mod contract {
+    use crate::abi::{Decoder, Error, Sink, Source};
+    use crate::macros::base58;
+    use crate::prelude::*;
+    use crate::types::{u128_from_neo_bytes, Address, U128};
+
+    pub enum Command<'a> {
+        Transfer { from: &'a Address, to: &'a Address, value: U128 },
+        BalanceOf { addr: &'a Address },
+    }
+
+    impl<'a> Decoder<'a> for Command<'a> {
+        fn decode(source: &mut Source<'a>) -> Result<Self, Error> {
+            let version = source.read_byte();
+            let method = source.read().unwrap();
+            match method {
+                "transfer" => {
+                    let param_l = source.read_varuint();
+                    let l = source.read_native_varuint().ok().unwrap();
+                    let from = source.read_native_address().ok().unwrap();
+                    let to = source.read_native_address().ok().unwrap();
+                    let amt: Vec<u8> = source.read().ok().unwrap();
+                    let value = u128_from_neo_bytes(amt.as_slice());
+                    println!("from:{}. to:{}", from.to_hex_string(), to.to_hex_string());
+                    return Ok(Command::Transfer { from, to, value });
+                }
+                "balance_of" => {
+                    let addr = source.read_native_address().ok().unwrap();
+                    return Ok(Command::BalanceOf { addr });
+                }
+                _ => panic!(""),
+            }
+        }
+    }
+}
