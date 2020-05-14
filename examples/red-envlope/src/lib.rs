@@ -198,3 +198,51 @@ pub fn invoke() {
     }
     runtime::ret(sink.bytes())
 }
+
+#[derive(Encoder, Decoder)]
+enum Data {
+    TransferFrom(Init),
+    A(u32),
+}
+
+//impl Encoder for Data {
+//    fn encode(&self, sink: &mut Sink) {
+//        match self {
+//            Data::I(val) => {
+//                sink.write("transferFrom");
+//                sink.write(val);
+//            }
+//        }
+//    }
+//}
+//impl Decoder for Data {
+//    fn decode(source: &mut Source) -> Result<Self, Error> {
+//        let a: &[u8] = source.read()?;
+//        match  a {
+//            b"transfer" => {
+//                let Init = source.read()?;
+//                Data::Init(Init)
+//            }
+//        }
+//    }
+//}
+
+#[derive(Encoder, Decoder, Debug)]
+struct Init {
+    a: u32,
+    b: u64,
+}
+
+#[test]
+fn test() {
+    let mut sink = Sink::new(16);
+    sink.write(Data::TransferFrom(Init { a: 1, b: 2 }));
+    let mut source = Source::new(sink.bytes());
+    let d: Data = source.read().unwrap();
+    match d {
+        Data::TransferFrom(init) => {
+            println!("{:?}", init);
+        }
+        Data::A(a) => {}
+    }
+}

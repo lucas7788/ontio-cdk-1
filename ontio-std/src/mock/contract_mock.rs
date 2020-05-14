@@ -4,6 +4,7 @@ use crate::abi::event_builder::{TYPE_ADDRESS, TYPE_INT, TYPE_STRING};
 use crate::abi::{Decoder, Error, Source};
 use crate::types::{u128_from_neo_bytes, Address, U128};
 
+#[derive(Debug)]
 pub enum Command<'a> {
     Transfer { from: &'a Address, to: &'a Address, value: U128 },
     BalanceOf { addr: &'a Address },

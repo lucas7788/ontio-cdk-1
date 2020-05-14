@@ -7,6 +7,7 @@ use ostd::abi::Dispatcher;
 use ostd::abi::{Sink, Source};
 use ostd::contract::ont;
 use ostd::prelude::*;
+use ostd::runtime::check_witness;
 use ostd::types::u128_to_neo_bytes;
 use ostd::{console, runtime};
 

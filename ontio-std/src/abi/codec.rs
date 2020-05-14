@@ -5,6 +5,8 @@ use super::{Decoder, Encoder, VmValueBuilder, VmValueDecoder, VmValueEncoder, Vm
 use crate::abi::Source;
 use crate::prelude::*;
 use crate::types::{Address, H256};
+use std::io::ErrorKind;
+use std::collections::btree_map::BTreeMap;
 
 impl<'a> Decoder<'a> for u8 {
     fn decode(source: &mut Source<'a>) -> Result<Self, Error> {
@@ -41,6 +43,17 @@ impl<'a, T: Decoder<'a>> Decoder<'a> for Vec<T> {
         }
 
         Ok(value)
+    }
+}
+
+impl<'a, T: Decoder<'a>> Decoder<'a> for Option<T> {
+    fn decode(source: &mut Source<'a>) -> Result<Self, Error> {
+        let is_val: bool = source.read()?;
+        if is_val {
+            source.read()
+        } else {
+            Ok(None)
+        }
     }
 }
 
@@ -174,6 +187,28 @@ where
         sink.write_varuint(self.len() as u64);
         for item in *self {
             sink.write(item);
+        }
+    }
+}
+
+impl<T: Encoder> Encoder for Option<T> {
+    fn encode(&self, sink: &mut Sink) {
+        if let Some(val) = self {
+            sink.write(true);
+            sink.write(val);
+        } else {
+            sink.write(false);
+        }
+    }
+}
+
+impl<K: Encoder,V:Encoder> Encoder for BTreeMap<K,V> {
+    fn encode(&self, sink: &mut Sink) {
+        let l = self.len() as u32;
+        sink.write(l);
+        for (k, v) in self.iter() {
+            sink.write(k);
+            sink.write(v);
         }
     }
 }
