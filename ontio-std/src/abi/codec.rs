@@ -5,8 +5,7 @@ use super::{Decoder, Encoder, VmValueBuilder, VmValueDecoder, VmValueEncoder, Vm
 use crate::abi::Source;
 use crate::prelude::*;
 use crate::types::{Address, H256};
-use std::io::ErrorKind;
-use std::collections::btree_map::BTreeMap;
+use alloc::collections::btree_map::BTreeMap;
 
 impl<'a> Decoder<'a> for u8 {
     fn decode(source: &mut Source<'a>) -> Result<Self, Error> {
@@ -202,7 +201,7 @@ impl<T: Encoder> Encoder for Option<T> {
     }
 }
 
-impl<K: Encoder,V:Encoder> Encoder for BTreeMap<K,V> {
+impl<K: Encoder, V: Encoder> Encoder for BTreeMap<K, V> {
     fn encode(&self, sink: &mut Sink) {
         let l = self.len() as u32;
         sink.write(l);
