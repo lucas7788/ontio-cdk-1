@@ -1,5 +1,5 @@
 use super::event_builder::{
-    TYPE_ADDRESS, TYPE_BOOL, TYPE_BYTEARRAY, TYPE_H256, TYPE_INT, TYPE_STRING,
+    TYPE_ADDRESS, TYPE_BOOL, TYPE_BYTEARRAY, TYPE_H256, TYPE_INT, TYPE_LIST, TYPE_STRING,
 };
 use super::Error;
 use super::Source;
@@ -72,6 +72,15 @@ impl<'a> VmValueParser<'a> {
         T::deserialize(self)
     }
 
+    pub fn list<T: VmValueDecoder<'a>>(&mut self) -> Result<T, Error> {
+        let ty = self.source.read_byte()?;
+        if ty != TYPE_LIST {
+            return Err(Error::TypeInconsistency);
+        }
+        let _ = self.source.read_u32()?;
+        self.read()
+    }
+
     pub fn string(&mut self) -> Result<&'a str, Error> {
         let ty = self.source.read_byte()?;
         if ty != TYPE_STRING {
@@ -80,6 +89,11 @@ impl<'a> VmValueParser<'a> {
         let l = self.source.read_u32()?;
         let buf = self.source.next_bytes(l as usize)?;
         str::from_utf8(buf).map_err(|_| Error::InvalidUtf8)
+    }
+
+    pub fn bytearray_vec(&mut self) -> Result<Vec<u8>, Error> {
+        let res = self.bytearray()?;
+        Ok(res.to_vec())
     }
 
     pub fn bytearray(&mut self) -> Result<&'a [u8], Error> {

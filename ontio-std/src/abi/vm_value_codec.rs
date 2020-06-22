@@ -1,7 +1,7 @@
 use super::Error;
+use crate::abi::event_builder::TYPE_LIST;
 use crate::abi::{VmValueBuilder, VmValueParser};
 use crate::prelude::*;
-
 pub trait VmValueEncoder {
     fn serialize(&self, sink: &mut VmValueBuilder);
 }
@@ -76,6 +76,34 @@ impl<'a> VmValueDecoder<'a> for &'a H256 {
     }
 }
 
+impl<'a> VmValueDecoder<'a> for Vec<u8> {
+    fn deserialize(parser: &mut VmValueParser<'a>) -> Result<Self, Error> {
+        parser.bytearray_vec()
+    }
+}
+
+impl<'a, T: VmValueDecoder<'a>> VmValueDecoder<'a> for Vec<T> {
+    fn deserialize(parser: &mut VmValueParser<'a>) -> Result<Self, Error> {
+        let ty = parser.source.read_byte()?;
+        if ty != TYPE_LIST {
+            return Err(Error::TypeInconsistency);
+        }
+        let len = parser.source.read_u32()?;
+        let mut value = Vec::with_capacity(cmp::min(len, 1024) as usize);
+        for _i in 0..len {
+            value.push(parser.read::<T>()?);
+        }
+        Ok(value)
+    }
+}
+
+impl<'a> VmValueDecoder<'a> for H256 {
+    fn deserialize(parser: &mut VmValueParser<'a>) -> Result<Self, Error> {
+        let r = parser.h256()?;
+        Ok(r.clone())
+    }
+}
+
 impl<'a> VmValueDecoder<'a> for U128 {
     fn deserialize(parser: &mut VmValueParser<'a>) -> Result<Self, Error> {
         parser.number()
@@ -85,11 +113,5 @@ impl<'a> VmValueDecoder<'a> for U128 {
 impl<'a> VmValueDecoder<'a> for &'a Address {
     fn deserialize(parser: &mut VmValueParser<'a>) -> Result<Self, Error> {
         parser.address()
-    }
-}
-
-impl<'a, T: VmValueDecoder<'a>> VmValueDecoder<'a> for &'a T {
-    fn deserialize(parser: &mut VmValueParser<'a>) -> Result<&'a T, Error> {
-        parser.read()
     }
 }

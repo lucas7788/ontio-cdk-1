@@ -11,6 +11,125 @@ pub mod neo {
     }
 }
 
+pub mod governance {
+    use crate::abi::{Decoder, Encoder, Error, Sink, Source};
+    use crate::console::debug;
+    use crate::macros::base58;
+    use crate::prelude::*;
+    use crate::runtime;
+    use crate::types::Address;
+    const GOV_CONTRACT_ADDRESS: Address = base58!("AFmseVrdL9f9oyCzZefL9tG6UbviEH9ugK");
+    const VERSION: u8 = 0;
+
+    pub struct PeerPoolItem {
+        pub index: u32,
+        pub peer_pubkey_addr: Address,
+        pub address: Address,
+        pub status: u8,
+        pub init_pos: u64,
+        pub total_pos: u64,
+    }
+
+    impl Encoder for PeerPoolItem {
+        fn encode(&self, sink: &mut Sink) {
+            sink.write_u32(self.index);
+            sink.write_address(&self.peer_pubkey_addr);
+            sink.write_address(&self.address);
+            sink.write_byte(self.status);
+            sink.write_u64(self.init_pos);
+            sink.write_u64(self.total_pos);
+        }
+    }
+
+    impl<'a> Decoder<'a> for PeerPoolItem {
+        fn decode(source: &mut Source<'a>) -> Result<Self, Error> {
+            let index = source.read_u32()?;
+            let peer_pub = source.read_address()?;
+            let addr = source.read_address()?;
+            let status = source.read_byte()?;
+            let init_pos = source.read_u64()?;
+            let total_pos = source.read_u64()?;
+            Ok(PeerPoolItem {
+                index,
+                peer_pubkey_addr: peer_pub.clone(),
+                address: addr.clone(),
+                status,
+                init_pos,
+                total_pos,
+            })
+        }
+    }
+    pub struct PeerPoolMap {
+        pub peer_pool_map: Vec<PeerPoolItem>,
+    }
+    impl Encoder for PeerPoolMap {
+        fn encode(&self, sink: &mut Sink) {
+            sink.write_u32(self.peer_pool_map.len() as u32);
+            for item in self.peer_pool_map.iter() {
+                sink.write(item);
+            }
+        }
+    }
+
+    impl<'a> Decoder<'a> for PeerPoolMap {
+        fn decode(source: &mut Source<'a>) -> Result<Self, Error> {
+            let l = source.read_u32()?;
+            let mut res: Vec<PeerPoolItem> = vec![];
+            for _ in 0..l {
+                let ppi: PeerPoolItem = source.read()?;
+                res.push(ppi);
+            }
+            Ok(PeerPoolMap { peer_pool_map: res })
+        }
+    }
+    pub fn get_peer_pool() -> PeerPoolMap {
+        let mut sink_param = Sink::new(64);
+        sink_param.write(VERSION);
+        sink_param.write("getPeerPool");
+        sink_param.write_byte(0);
+        let res = runtime::call_contract(&GOV_CONTRACT_ADDRESS, sink_param.bytes());
+        if let Some(data) = res {
+            let mut source = Source::new(data.as_slice());
+            debug(str::from_utf8(data.as_slice()).unwrap_or_default());
+            source.read().unwrap()
+        } else {
+            panic!("invoke get_peer_pool failed");
+        }
+    }
+
+    pub fn get_peer_info(pk_addr: &Address) -> PeerPoolItem {
+        let mut sink = Sink::new(64);
+        sink.write_native_address(pk_addr);
+        let mut sink_param = Sink::new(64);
+        sink_param.write(VERSION);
+        sink_param.write("getPeerInfo");
+        sink_param.write(sink.bytes());
+        let res = runtime::call_contract(&GOV_CONTRACT_ADDRESS, sink_param.bytes());
+        if let Some(data) = res {
+            let mut source = Source::new(data.as_slice());
+            source.read().unwrap()
+        } else {
+            panic!("invoke get_peer_info failed");
+        }
+    }
+
+    pub fn get_peer_pool_by_address(addr: &Address) -> PeerPoolMap {
+        let mut sink = Sink::new(32);
+        sink.write(addr);
+        let mut sink_param = Sink::new(64);
+        sink_param.write(VERSION);
+        sink_param.write("getPeerPoolByAddress");
+        sink_param.write(sink.bytes());
+        let res = runtime::call_contract(&GOV_CONTRACT_ADDRESS, sink_param.bytes());
+        if let Some(data) = res {
+            let mut source = Source::new(data.as_slice());
+            source.read().unwrap()
+        } else {
+            panic!("invoke get_peer_pool_by_address failed");
+        }
+    }
+}
+
 pub mod ontid {
     use super::super::types::u128_to_neo_bytes;
     use crate::abi::Sink;

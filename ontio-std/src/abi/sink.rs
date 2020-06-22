@@ -103,6 +103,10 @@ impl Sink {
         self.write(address);
     }
 
+    pub(crate) fn write_address(&mut self, address: &Address) {
+        self.write_bytes(address.as_ref());
+    }
+
     pub fn write_neovm_address(&mut self, address: &Address) {
         self.write_native_address(address)
     }
