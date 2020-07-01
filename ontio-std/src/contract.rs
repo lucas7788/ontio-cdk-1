@@ -249,8 +249,8 @@ pub mod ontid {
         sink.write_native_varuint(attributes.len() as u64);
         for attr in attributes.iter() {
             sink.write(attr.key.as_slice());
-            sink.write(attr.value.as_slice());
             sink.write(attr.value_type.as_slice());
+            sink.write(attr.value.as_slice());
         }
         sink.write(serialize_signers(signers));
         let mut sink_param = Sink::new(64);
