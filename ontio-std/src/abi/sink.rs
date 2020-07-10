@@ -26,6 +26,11 @@ impl Sink {
         Sink { buf: Vec::with_capacity(cap) }
     }
 
+
+    pub fn clear(&mut self) {
+        self.buf.clear()
+    }
+
     ///All data types that implement the encode interface can be serialized by calling the write method
     ///# Example
     ///```
