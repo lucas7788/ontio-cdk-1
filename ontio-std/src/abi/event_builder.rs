@@ -74,6 +74,13 @@ impl EventBuilder {
         self
     }
 
+    pub fn address_list(mut self, address: &[Address]) -> Self {
+        for addr in address.iter() {
+            self.common.address(addr);
+        }
+        self
+    }
+
     ///Push U128 type event in contract
     ///# Example
     ///```no_run

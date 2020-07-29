@@ -26,7 +26,6 @@ impl Sink {
         Sink { buf: Vec::with_capacity(cap) }
     }
 
-
     pub fn clear(&mut self) {
         self.buf.clear()
     }
